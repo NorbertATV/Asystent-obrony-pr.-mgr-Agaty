@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asystent Obrony Pracy Magisterskiej</title>
+    <title>Asystent Obrony Pracy Magisterskiej Agaty</title>
     <style>
         :root {
             --primary-bg: #f8f9fa;
@@ -101,14 +101,27 @@
         .listen-button:hover {
             background-color: #e9f5ff;
         }
+        .examiner-input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
         .examiner-input {
-            width: 100%;
+            flex-grow: 1;
             padding: 12px;
             font-size: 16px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
-            margin-bottom: 10px;
+        }
+        #voice-input-button {
+            flex-shrink: 0;
+            width: 48px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            font-size: 20px;
+            border-radius: 6px;
+            cursor: pointer;
         }
         .examiner-button {
             display: block;
@@ -132,7 +145,7 @@
 <body>
 
     <div class="container">
-        <h1>🎓 Asystent Obrony Pracy Magisterskiej</h1>
+        <h1>🎓 Asystent Obrony Pracy Magisterskiej Agaty</h1>
         
         <div class="mode-section">
             <h2>Losowe Pytania Egzaminacyjne</h2>
@@ -145,8 +158,11 @@
 
         <div class="mode-section">
             <h2>Tryb Egzaminatora</h2>
-            <p>Napisz własne pytanie i uzyskaj odpowiedź na podstawie pracy.</p>
-            <input type="text" id="examiner-input-field" class="examiner-input" placeholder="Wpisz swoje pytanie tutaj...">
+            <p>Napisz własne pytanie lub zadaj je głosowo i uzyskaj odpowiedź na podstawie pracy.</p>
+            <div class="examiner-input-wrapper">
+                <input type="text" id="examiner-input-field" class="examiner-input" placeholder="Wpisz lub podyktuj pytanie...">
+                <button id="voice-input-button" title="Zadaj pytanie głosem">🎤</button>
+            </div>
             <button id="examiner-submit-button" class="examiner-button">Zapytaj Asystenta</button>
             <div id="examiner-response-container" class="examiner-response" style="display: none;"></div>
         </div>
@@ -154,17 +170,37 @@
 
     <script>
         const questionsAndAnswers = [
-            // Pytania w stylu promotorskim
-            { question: "Co skłoniło Panią do wyboru właśnie takiego tematu pracy magisterskiej? [cite_start]Jaka była główna motywacja?", answer: "Moją główną motywacją była obserwacja, że w dzisiejszym, przesyconym informacjami świecie, tradycyjne reklamy oparte na logice tracą na skuteczności[cite: 28]. [cite_start]Zauważyłam, że marketerzy coraz częściej i odważniej odwołują się do emocji, aby przyciągnąć uwagę konsumenta[cite: 29]. [cite_start]Chciałam dogłębnie zrozumieć, jakie mechanizmy psychologiczne za tym stoją – jak emocje wpływają na nasze decyzje i budują relacje z markami[cite: 30, 32]. Uznałam, że jest to temat istotny zarówno z perspektywy tworzenia skuteczniejszych kampanii, jak i budowania świadomości konsumenckiej." },
+            // Pełna baza 30 pytań w stylu promotorskim
+            { question: "Co skłoniło Panią do wyboru właśnie takiego tematu pracy magisterskiej? Jaka była główna motywacja?", answer: "Moją główną motywacją była obserwacja, że w dzisiejszym, przesyconym informacjami świecie, tradycyjne reklamy oparte na logice tracą na skuteczności. Zauważyłam, że marketerzy coraz częściej i odważniej odwołują się do emocji, aby przyciągnąć uwagę konsumenta. Chciałam dogłębnie zrozumieć, jakie mechanizmy psychologiczne za tym stoją – jak emocje wpływają na nasze decyzje i budują relacje z markami. Uznałam, że jest to temat istotny zarówno z perspektywy tworzenia skuteczniejszych kampanii, jak i budowania świadomości konsumenckiej." },
             { question: "Jaką lukę badawczą w istniejącej literaturze przedmiotu stara się wypełnić Pani praca?", answer: "Chociaż istnieje wiele badań na temat psychologii emocji oraz na temat skuteczności reklamy, moja praca stara się połączyć te dwa obszary w specyficznym kontekście. Celem było nie tylko potwierdzenie, że emocje w reklamie działają, ale przede wszystkim zidentyfikowanie i skategoryzowanie różnych modeli strategicznych, jakie marki przyjmują. Próbowałam wykazać, że 'reklama emocjonalna' nie jest zjawiskiem jednolitym, lecz spektrum działań – od prostego budowania sympatii, po skomplikowane interwencje społeczne, co w polskim piśmiennictwie nie zostało jeszcze w pełni usystematyzowane." },
-            { question: "Proszę w kilku zdaniach przedstawić główną tezę badawczą, którą postawiła Pani w swojej pracy.", answer: "Główna teza badawcza mojej pracy zakłada, że skuteczność reklam emocjonalnych nie leży w sile pojedynczej emocji, lecz w spójności strategicznego modelu, który marka przyjmuje. [cite_start]Udowadniam, że poprzez świadome operowanie na różnych rejestrach emocji – od katartycznego wzruszenia, przez euforyczną ekscytację, aż po krytyczny dyskomfort – marki mogą nie tylko wpływać na decyzje zakupowe, ale fundamentalnie zmieniać swoją percepcję w oczach konsumentów, budując kapitał oparty na wspólnych wartościach i doświadczeniach[cite: 1323, 1365]." },
-            [cite_start]{ question: "Dlaczego zdecydowała się Pani na jakościową metodologię badań, a nie na przykład na badania ilościowe, ankietowe?", answer: "Zdecydowałam się na metodologię jakościową, a konkretnie na indywidualne wywiady pogłębione, ponieważ moim celem było dogłębne zrozumienie subiektywnych odczuć i ukrytych motywacji odbiorców[cite: 49]. [cite_start]Badania ilościowe pozwoliłyby zmierzyć 'co' ludzie czują, ale to właśnie IDI pozwoliło odpowiedzieć na pytanie 'dlaczego' i 'jak' te emocje są przetwarzane[cite: 656]. Chciałam uchwycić niuanse, osobiste skojarzenia i rezonans autobiograficzny, czego nie dałaby mi ankieta. Zależało mi na bogactwie danych, a nie na ich statystycznej reprezentatywności." },
+            { question: "Proszę w kilku zdaniach przedstawić główną tezę badawczą, którą postawiła Pani w swojej pracy.", answer: "Główna teza badawcza mojej pracy zakłada, że skuteczność reklam emocjonalnych nie leży w sile pojedynczej emocji, lecz w spójności strategicznego modelu, który marka przyjmuje. Udowadniam, że poprzez świadome operowanie na różnych rejestrach emocji – od katartycznego wzruszenia, przez euforyczną ekscytację, aż po krytyczny dyskomfort – marki mogą nie tylko wpływać na decyzje zakupowe, ale fundamentalnie zmieniać swoją percepcję w oczach konsumentów, budując kapitał oparty na wspólnych wartościach i doświadczeniach." },
+            { question: "Dlaczego zdecydowała się Pani na jakościową metodologię badań, a nie na przykład na badania ilościowe, ankietowe?", answer: "Zdecydowałam się na metodologię jakościową, a konkretnie na indywidualne wywiady pogłębione, ponieważ moim celem było dogłębne zrozumienie subiektywnych odczuć i ukrytych motywacji odbiorców. Badania ilościowe pozwoliłyby zmierzyć 'co' ludzie czują, ale to właśnie IDI pozwoliło odpowiedzieć na pytanie 'dlaczego' i 'jak' te emocje są przetwarzane. Chciałam uchwycić niuanse, osobiste skojarzenia i rezonans autobiograficzny, czego nie dałaby mi ankieta. Zależało mi na bogactwie danych, a nie na ich statystycznej reprezentatywności." },
             { question: "Jakie były największe wyzwania lub trudności, na jakie natrafiła Pani podczas realizacji części badawczej?", answer: "Największym wyzwaniem była obiektywna analiza i kategoryzacja bardzo subiektywnych, emocjonalnych wypowiedzi respondentów. Każda osoba inaczej interpretuje i nazywa swoje uczucia, dlatego kluczowe było znalezienie wspólnych wzorców i mechanizmów psychologicznych, które stały za tymi indywidualnymi reakcjami. Trudnością było również uniknięcie własnych uprzedzeń i interpretacji, aby jak najwierniej oddać perspektywę badanych osób. Wymagało to starannego przygotowania scenariusza wywiadu i rygorystycznej analizy zebranego materiału." },
-            { question: "Który z wniosków płynących z Pani badań był dla Pani najbardziej zaskakujący lub nieoczywisty?", answer: "Najbardziej zaskakująca była dla mnie potęga i skuteczność modelu krytyczno-społecznego, reprezentowanego przez kampanię Dove. Intuicyjnie zakładałam, że reklama, aby była skuteczna, musi wywoływać przyjemne odczucia. [cite_start]Tymczasem badanie dowiodło, że celowe wywołanie negatywnych emocji, takich jak lęk czy dyskomfort, może prowadzić do niezwykle silnego zaangażowania i zbudowania lojalności opartej na wspólnocie wartości[cite: 1391, 1393]. To pokazało, że rola reklamy ewoluuje w kierunku aktywizmu marki, co było dla mnie nieoczywistym odkryciem." },
-            [cite_start]{ question: "Jaki jest, Pani zdaniem, najważniejszy wniosek płynący z Pani pracy?", answer: "Moim zdaniem, najważniejszy wniosek jest taki, że współczesny, świadomy konsument nie szuka w reklamie jedynie informacji o produkcie, ale wartości i autentycznego doświadczenia[cite: 1361]. Sukces marek takich jak Allegro czy Dove dowodzi, że najtrwalszą więź buduje się poprzez opowiadanie uniwersalnych, ludzkich historii lub odważne zabieranie głosu w ważnych sprawach społecznych. To pokazuje fundamentalną zmianę w komunikacji marketingowej – przejście od perswazji do budowania relacji opartych na empatii i wspólnych wartościach." },
-            { question: "Jakie widzi Pani praktyczne zastosowania wniosków ze swojej pracy? [cite_start]Kto mógłby z nich skorzystać?", answer: "Wnioski mają szerokie zastosowanie praktyczne, przede wszystkim dla marketerów i strategów marek[cite: 1398]. [cite_start]Moja praca dostarcza im typologii modeli emocjonalnych, która może pomóc w świadomym projektowaniu kampanii zgodnych z tożsamością ich marki[cite: 1411]. Zrozumienie, czy marka ma być 'pomocnikiem' jak Allegro, 'aktywistą' jak Dove, czy 'kreatorem rytuału' jak McDonald's, jest kluczowe dla jej sukcesu. Poza tym, praca może być przydatna dla studentów marketingu i psychologii oraz dla świadomych konsumentów, pomagając im w krytycznym odbiorze przekazów reklamowych." },
-            { question: "Jakie są główne ograniczenia przeprowadzonych przez Panią badań?", answer: "Jestem świadoma głównych ograniczeń mojej pracy. [cite_start]Przede wszystkim, jako badanie o charakterze jakościowym, opierało się ono na niewielkiej, celowo dobranej próbie, co oznacza, że jego wyników nie można uogólniać statystycznie na całą populację[cite: 1403, 1430]. Ponadto, istnieje element subiektywnej interpretacji badacza, nieodłączny dla analizy danych jakościowych. Istotnym ograniczeniem jest też sztuczność samej sytuacji badawczej, która mogła wpłynąć na spontaniczność reakcji respondentów w porównaniu do naturalnego odbioru reklamy w domu." },
-            { question: "Gdyby miała Pani kontynuować badania w tym obszarze, w jakim kierunku by Pani poszła?", answer: "Gdybym mogła kontynuować badania, skupiłabym się na trzech kierunkach. [cite_start]Po pierwsze, na badaniach ilościowych, które pozwoliłyby na statystyczną weryfikację zidentyfikowanych modeli na dużej, reprezentatywnej próbie[cite: 1433]. [cite_start]Po drugie, fascynujące byłyby badania międzykulturowe, sprawdzające, czy te same strategie emocjonalne rezonują tak samo w kulturach kolektywistycznych[cite: 1436]. [cite_start]Po trzecie, chciałabym zastosować narzędzia z obszaru neuromarketingu, takie jak EEG czy fMRI, aby zbadać nieuświadomione, fizjologiczne reakcje mózgu na poszczególne spoty, co dałoby biologiczne dowody na istnienie analizowanych mechanizmów[cite: 1437, 1438]." }
+            { question: "Który z wniosków płynących z Pani badań był dla Pani najbardziej zaskakujący lub nieoczywisty?", answer: "Najbardziej zaskakująca była dla mnie potęga i skuteczność modelu krytyczno-społecznego, reprezentowanego przez kampanię Dove. Intuicyjnie zakładałam, że reklama, aby była skuteczna, musi wywoływać przyjemne odczucia. Tymczasem badanie dowiodło, że celowe wywołanie negatywnych emocji, takich jak lęk czy dyskomfort, może prowadzić do niezwykle silnego zaangażowania i zbudowania lojalności opartej na wspólnocie wartości. To pokazało, że rola reklamy ewoluuje w kierunku aktywizmu marki, co było dla mnie nieoczywistym odkryciem." },
+            { question: "Jaki jest, Pani zdaniem, najważniejszy wniosek płynący z Pani pracy?", answer: "Moim zdaniem, najważniejszy wniosek jest taki, że współczesny, świadomy konsument nie szuka w reklamie jedynie informacji o produkcie, ale wartości i autentycznego doświadczenia. Sukces marek takich jak Allegro czy Dove dowodzi, że najtrwalszą więź buduje się poprzez opowiadanie uniwersalnych, ludzkich historii lub odważne zabieranie głosu w ważnych sprawach społecznych. To pokazuje fundamentalną zmianę w komunikacji marketingowej – przejście od perswazji do budowania relacji opartych na empatii i wspólnych wartościach." },
+            { question: "Jakie widzi Pani praktyczne zastosowania wniosków ze swojej pracy? Kto mógłby z nich skorzystać?", answer: "Wnioski mają szerokie zastosowanie praktyczne, przede wszystkim dla marketerów i strategów marek. Moja praca dostarcza im typologii modeli emocjonalnych, która może pomóc w świadomym projektowaniu kampanii zgodnych z tożsamością ich marki. Zrozumienie, czy marka ma być 'pomocnikiem' jak Allegro, 'aktywistą' jak Dove, czy 'kreatorem rytuału' jak McDonald's, jest kluczowe dla jej sukcesu. Poza tym, praca może być przydatna dla studentów marketingu i psychologii oraz dla świadomych konsumentów, pomagając im w krytycznym odbiorze przekazów reklamowych." },
+            { question: "Jakie są główne ograniczenia przeprowadzonych przez Panią badań?", answer: "Jestem świadoma głównych ograniczeń mojej pracy. Przede wszystkim, jako badanie o charakterze jakościowym, opierało się ono na niewielkiej, celowo dobranej próbie, co oznacza, że jego wyników nie można uogólniać statystycznie na całą populację. Ponadto, istnieje element subiektywnej interpretacji badacza, nieodłączny dla analizy danych jakościowych. Istotnym ograniczeniem jest też sztuczność samej sytuacji badawczej, która mogła wpłynąć na spontaniczność reakcji respondentów w porównaniu do naturalnego odbioru reklamy w domu." },
+            { question: "Gdyby miała Pani kontynuować badania w tym obszarze, w jakim kierunku by Pani poszła?", answer: "Gdybym mogła kontynuować badania, skupiłabym się na trzech kierunkach. Po pierwsze, na badaniach ilościowych, które pozwoliłyby na statystyczną weryfikację zidentyfikowanych modeli na dużej, reprezentatywnej próbie. Po drugie, fascynujące byłyby badania międzykulturowe, sprawdzające, czy te same strategie emocjonalne rezonują tak samo w kulturach kolektywistycznych. Po trzecie, chciałabym zastosować narzędzia z obszaru neuromarketingu, takie jak EEG czy fMRI, aby zbadać nieuświadomione, fizjologiczne reakcje mózgu na poszczególne spoty, co dałoby biologiczne dowody na istnienie analizowanych mechanizmów." },
+            { question: "Proszę uzasadnić dobór studiów przypadku do części empirycznej. Czym kierowała się Pani przy ich wyborze?", answer: "Doboru studiów przypadku dokonałam w sposób celowy i przemyślany. Zależało mi na zaprezentowaniu możliwie szerokiego spektrum strategii emocjonalnych. Kampania T-Mobile reprezentuje klasyczny model humanistyczny. Allegro to przykład mistrzowskiego storytellingu katartycznego. Z kolei McDonald's ilustruje model oparty na masowym rytuale i stymulacji sensorycznej. Natomiast kampania Dove została wybrana jako radykalny przykład marketingu zaangażowanego, który operuje na emocjach negatywnych. Taki dobór pozwolił mi na wszechstronną analizę i stworzenie zróżnicowanej typologii." },
+            { question: "W jaki sposób Pani praca przyczynia się do rozwoju wiedzy w dziedzinie psychologii marketingu?", answer: "Moja praca wnosi wkład do istniejącej wiedzy poprzez usystematyzowanie i nazwanie różnych modeli perswazji emocjonalnej. Zamiast traktować 'reklamę emocjonalną' jako jednolity byt, proponuję jej typologię opartą na dominującej strategii afektywnej i roli marki w narracji. Pokazuję, że marki mogą być nie tylko dostawcami produktów, ale również partnerami w realizacji celów życiowych, kreatorami kultury czy inicjatorami dialogu społecznego. To zniuansowane podejście poszerza rozumienie współczesnych relacji między marką a konsumentem." },
+            { question: "Gdyby miała Pani streścić przesłanie swojej pracy w jednym zdaniu, jak by ono brzmiało?", answer: "Główne przesłanie mojej pracy brzmi: we współczesnym marketingu kluczem do zbudowania trwałej więzi z konsumentem nie jest siła argumentu, lecz autentyczność emocjonalnego doświadczenia, które marka potrafi zaoferować." },
+            { question: "Jakie wnioski z Pani analizy mogą być najbardziej interesujące z perspektywy konsumenta?", answer: "Z perspektywy konsumenta, najbardziej interesującym wnioskiem może być uświadomienie sobie, jak zaawansowane mechanizmy psychologiczne są wykorzystywane w celu wpłynięcia na jego postawy i decyzje. Zrozumienie, że reklama może operować na rezonansie autobiograficznym, zarażaniu emocjonalnym czy efekcie aureoli, pozwala na bardziej świadomy i krytyczny odbiór komunikatów marketingowych. Daje to narzędzia do lepszego rozumienia, dlaczego pewne marki darzymy sympatią, a inne nie, co wzmacnia jego suwerenność." },
+            { question: "Patrząc z perspektywy czasu, czy jest coś, co zmieniłaby Pani w podejściu do tego tematu lub w samej pracy?", answer: "Patrząc z perspektywy czasu, być może rozważyłabym dodanie komponentu ilościowego do moich badań, aby sprawdzić, czy zidentyfikowane przeze mnie modele mają przełożenie na twarde wskaźniki, takie jak skłonność do zakupu czy rekomendacji. Mogłabym również poszerzyć analizę o reklamy, które okazały się emocjonalnymi porażkami, aby lepiej zrozumieć, jakie błędy w strategii afektywnej prowadzą do odrzucenia przekazu. Uważam jednak, że przyjęta metodologia jakościowa była słusznym wyborem dla postawionych celów badawczych." },
+            { question: "Jakie są, według Pani, przyszłe trendy w wykorzystaniu emocji w komunikacji marketingowej?", answer: "Sądzę, że będziemy obserwować dalszą ewolucję w kierunku hiperpersonalizacji i marketingu zaangażowanego. Marki będą dążyć do tworzenia jeszcze głębszych, niemal intymnych relacji z konsumentami, opartych na wspólnych wartościach i autentyczności. Spodziewam się również rosnącej roli technologii, takich jak sztuczna inteligencja, w analizowaniu i reagowaniu na emocje konsumentów w czasie rzeczywistym. Kluczowym wyzwaniem pozostanie jednak zachowanie autentyczności i unikanie poczucia manipulacji w tych coraz bardziej zaawansowanych interakcjach." },
+            { question: "Jak w kontekście Pani pracy rozumieć pojęcie 'humanizacji marki'?", answer: "Humanizacja marki to proces, w którym na skutek skutecznej komunikacji emocjonalnej, marka przestaje być postrzegana jako anonimowa, komercyjna korporacja, a zaczyna być odbierana jako byt o ludzkich cechach – empatyczny, rozumiejący, posiadający wartości, a nawet 'duszę'. W moich badaniach było to szczególnie widoczne w przypadku Allegro i T-Mobile. Ten proces jest kluczowy dla budowania głębokiego zaufania i lojalności, ponieważ ludzie łatwiej i trwalej przywiązują się do 'osób' niż do bezosobowych podmiotów." },
+            { question: "Proszę wyjaśnić, dlaczego lojalność oparta na emocjach jest trwalsza niż ta oparta na czynnikach racjonalnych.", answer: "Lojalność oparta na czynnikach racjonalnych, takich jak cena czy funkcjonalność, jest nietrwała, ponieważ zawsze może pojawić się konkurent z lepszą ofertą. Z kolei lojalność emocjonalna opiera się na przywiązaniu, zaufaniu i wspólnej tożsamości. Tworzy ona 'poduszkę bezpieczeństwa' – konsument jest bardziej wyrozumiały wobec błędów marki i mniej podatny na argumenty konkurencji, ponieważ jego relacja z marką wykracza poza prostą kalkulację kosztów i korzyści. Ta więź jest znacznie trudniejsza do zerwania." },
+            { question: "Czy Pani zdaniem każda marka może pozwolić sobie na prowadzenie marketingu zaangażowanego, jak w przypadku Dove?", answer: "Nie, uważam, że jest to strategia zarezerwowana dla marek o ugruntowanej pozycji i wysokiej wiarygodności. Wejście w model krytyczno-społeczny wymaga autentycznego i długofalowego zaangażowania w dany problem. Marka musi być gotowa na potencjalne kontrowersje, a jej działania korporacyjne muszą być spójne z głoszonymi hasłami, aby uniknąć zarzutu hipokryzji. Dla wielu firm próba podjęcia takiej strategii bez odpowiedniego przygotowania mogłaby okazać się niewiarygodna i przynieść efekt odwrotny do zamierzonego." },
+            { question: "W jaki sposób praca odnosi się do etycznego wymiaru stosowania perswazji emocjonalnej?", answer: "Praca podkreśla, że skuteczna kampania emocjonalna rezonuje z realnym doświadczeniem odbiorcy, a nie manipuluje jego uczuciami. Etyczny wymiar polega na świadomości ogromnej siły oddziaływania i odpowiedzialnym jej wykorzystaniu. Niedopuszczalne jest świadome używanie emocji, zwłaszcza negatywnych, do wprowadzania w błąd, wywoływania niepotrzebnego lęku czy szkodzenia odbiorcom. Tego typu działania, choć mogą przynieść krótkoterminowy efekt, w dłuższej perspektywie nieuchronnie prowadzą do utraty zaufania, które jest fundamentem każdej trwałej relacji z marką." },
+            { question: "Proszę podsumować, czym charakteryzuje się zidentyfikowany przez Panią 'model narracyjno-katartyczny'.", answer: "Model narracyjno-katartyczny, którego przykładem jest reklama Allegro, polega na wykorzystaniu kompletnej struktury filmowej do opowiedzenia uniwersalnej historii. Marginalizuje ona produkt na rzecz wiarygodnego bohatera i jego dążeń, budując głęboką empatię. Celem jest wywołanie u widza silnego rezonansu autobiograficznego i doprowadzenie go do katharsis, czyli oczyszczającego wzruszenia. W tym modelu marka pozycjonuje się jako dyskretny pomocnik, a nie główny bohater, co wzmacnia autentyczność przekazu." },
+            { question: "Jak Pani rozumie pojęcie 'kapitału emocjonalnego marki'?", answer: "Kapitał emocjonalny marki to suma wszystkich pozytywnych uczuć, skojarzeń i więzi, jakie konsumenci mają z daną marką. Jest to niematerialny, ale niezwykle cenny zasób, który buduje się poprzez konsekwentne dostarczanie pozytywnych doświadczeń emocjonalnych. Wysoki kapitał emocjonalny przekłada się na większą lojalność, wyższą postrzeganą wartość marki oraz większą odporność na kryzysy wizerunkowe. Moja praca pokazuje, jak różne strategie reklamowe przyczyniają się do budowania tego kapitału." },
+            { question: "Dlaczego w Pani badaniu respondenci tak negatywnie oceniali standardowe reklamy w porównaniu do analizowanych przykładów?", answer: "Respondenci opisywali standardowe reklamy jako 'irytujące', 'nachalne' i 'głośne', ponieważ opierają się one zazwyczaj na modelu bezpośredniej perswazji, który często jest odbierany jako próba manipulacji. Analizowane przykłady odniosły sukces, ponieważ odeszły od tego schematu. Zamiast 'atakować' odbiorcę komunikatem, zaangażowały go w opowieść (Allegro), zaprosiły do wspólnoty (T-Mobile), sprowokowały do myślenia (Dove) lub wciągnęły w radosny rytuał (McDonald's). To buduje szacunek i sprawia, że komunikat jest odbierany jako wartościowa treść, a nie intruz." },
+            { question: "Proszę wyjaśnić, jak działają dwa tryby przetwarzania informacji, centralny i peryferyjny, w kontekście reklamy emocjonalnej.", answer: "Zgodnie z modelem ELM, tryb centralny to głęboka, analityczna ocena argumentów, wymagająca wysiłku poznawczego. Tryb peryferyjny opiera się na powierzchownych wskazówkach, takich jak sympatia do aktora czy właśnie emocje. Reklama emocjonalna najczęściej aktywuje tryb peryferyjny. Pozytywne uczucie wywołane przez estetykę reklamy może zostać przeniesione na markę bez świadomej analizy cech produktu, co jest niezwykle skuteczną formą perswazji, zwłaszcza w warunkach niskiego zaangażowania odbiorcy." },
+            { question: "Jakie znaczenie w Pani pracy ma pojęcie 'autentyczności'?", answer: "Autentyczność jest fundamentem skuteczności reklamy emocjonalnej, co wielokrotnie podkreślali respondenci w moich badaniach. Odbiorcy są wyczuleni na fałsz, a próba nieautentycznej manipulacji uczuciami prowadzi do odrzucenia przekazu. Autentyczność przejawiała się w wiarygodności emocji bohaterów, w spójności przekazu z wartościami marki oraz w szczerości intencji, zwłaszcza w przypadku kampanii o charakterze społecznym. Bez autentyczności, nawet najlepiej skonstruowana strategia emocjonalna okaże się nieskuteczna." },
+            { question: "W jaki sposób Pani badania potwierdzają tezę o rosnącej roli 'storytellingu' w marketingu?", answer: "Moje badania, zwłaszcza analiza reklamy Allegro, stanowią silne potwierdzenie tej tezy. Reakcje respondentów – od rozbawienia po głębokie wzruszenie – dowiodły, że kompletna, filmowa narracja jest w stanie zaangażować odbiorcę na poziomie nieosiągalnym dla tradycyjnych formatów. Storytelling aktywuje empatię, buduje rezonans autobiograficzny i sprawia, że marka staje się częścią osobistej historii widza. To pokazuje, że opowiadanie historii jest obecnie jednym z najpotężniejszych narzędzi budowania trwałej więzi emocjonalnej." },
+            { question: "Czy Pani zdaniem istnieje ryzyko 'zmęczenia emocjonalnego' u konsumentów w związku z nadużywaniem tego typu reklam?", answer: "Tak, uważam, że takie ryzyko istnieje. W miarę jak coraz więcej marek będzie sięgać po te same, uniwersalne emocje, takie jak wzruszenie czy radość, może dojść do dewaluacji ich siły. Konsumenci mogą stać się cyniczni wobec prób wywoływania uczuć. Dlatego kluczowa staje się oryginalność, autentyczność i strategiczne zróżnicowanie, które pokazałam w mojej typologii. Marki, które potrafią operować na mniej oczywistych emocjach lub tworzyć unikalne doświadczenia, jak McDonald's ze swoim rytuałem, będą miały przewagę." },
+            { question: "Jaką rolę w budowaniu 'kapitału zaufania' do marki odgrywa marketing zaangażowany społecznie?", answer: "Marketing zaangażowany, jak w przypadku Dove, odgrywa ogromną rolę w budowaniu kapitału zaufania, ponieważ pokazuje, że marce zależy na czymś więcej niż tylko na zysku. Kiedy marka odważnie staje po stronie ważnych wartości i podejmuje realne działania, konsumenci zaczynają ją postrzegać jako wiarygodnego partnera i sojusznika. To buduje lojalność opartą na wspólnej misji i przekonaniach, która jest znacznie głębsza i trwalsza niż lojalność oparta na produkcie. Jednak warunkiem jest tu absolutna autentyczność i spójność działań." },
+            { question: "W jaki sposób Pani praca wpisuje się w szerszy kontekst zmian w komunikacji i mediach?", answer: "Moja praca jest refleksją nad zmianami, jakie zachodzą w komunikacji w erze cyfrowej. W świecie, gdzie uwaga jest najcenniejszą walutą, a media społecznościowe promują treści o silnym ładunku emocjonalnym, marketing musiał się do tego dostosować. Analizowane przeze mnie strategie są odpowiedzią na te zmiany. Pokazują one przejście od jednokierunkowej perswazji do budowania dialogu, od informowania do angażowania, i od produktu do doświadczenia. To odzwierciedla szerszą transformację mediów w kierunku większej interaktywności i personalizacji." },
+            { question: "Na zakończenie, proszę raz jeszcze sformułować najważniejszą, Pani zdaniem, rekomendację dla praktyków marketingu.", answer: "Moja najważniejsza rekomendacja brzmi: przestańcie myśleć o tym, co chcecie powiedzieć o swoim produkcie, a zacznijcie myśleć o tym, co Wasi odbiorcy chcą poczuć. Zrozumienie ich najgłębszych dążeń, wartości i emocji jest kluczem do stworzenia komunikacji, która nie będzie tylko kolejną reklamą, ale stanie się dla nich znaczącym i zapamiętanym doświadczeniem. Autentyczność w opowiadaniu historii, która rezonuje z ludzkim doświadczeniem, jest najcenniejszym kapitałem, jaki marka może dziś zbudować." }
         ];
 
         // --- Logika Aplikacji ---
@@ -177,19 +213,75 @@
             const examinerSubmitButton = document.getElementById('examiner-submit-button');
             const examinerResponseContainer = document.getElementById('examiner-response-container');
             const refreshButton = document.getElementById('refresh-button');
+            const voiceInputButton = document.getElementById('voice-input-button');
 
-            function speakText(textToSpeak) {
+            // --- Logika Syntezatora Mowy (TTS) ---
+            function speakText(textToSpeak, button) {
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
+                    if (window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                        return;
+                    }
+                    window.speechSynthesis.cancel(); 
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
                     utterance.lang = 'pl-PL';
                     utterance.rate = 0.95;
+                    utterance.onstart = () => {
+                        button.innerHTML = '⏹️ Zatrzymaj';
+                    };
+                    utterance.onend = () => {
+                        button.innerHTML = '🔊 Odsłuchaj';
+                    };
+                    utterance.onerror = () => {
+                        button.innerHTML = '🔊 Odsłuchaj';
+                    };
                     window.speechSynthesis.speak(utterance);
                 } else {
                     alert('Twoja przeglądarka nie wspiera funkcji syntezatora mowy.');
                 }
             }
 
+            // --- Logika Rozpoznawania Mowy ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'pl-PL';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                voiceInputButton.addEventListener('click', () => {
+                    recognition.start();
+                });
+
+                recognition.onstart = () => {
+                    examinerInputField.placeholder = "Słucham...";
+                    voiceInputButton.textContent = '...';
+                };
+
+                recognition.onspeechend = () => {
+                    recognition.stop();
+                    examinerInputField.placeholder = "Wpisz lub podyktuj pytanie...";
+                    voiceInputButton.textContent = '🎤';
+                };
+
+                recognition.onresult = (event) => {
+                    const speechResult = event.results[0][0].transcript;
+                    examinerInputField.value = speechResult;
+                    handleExaminerQuestion(); 
+                };
+                
+                recognition.onerror = (event) => {
+                    alert(`Błąd rozpoznawania mowy: ${event.error}. Upewnij się, że udzieliłeś/aś pozwolenia na dostęp do mikrofonu.`);
+                    examinerInputField.placeholder = "Wpisz lub podyktuj pytanie...";
+                    voiceInputButton.textContent = '🎤';
+                };
+
+            } else {
+                voiceInputButton.style.display = 'none';
+            }
+
+
+            // --- Logika Fiszki ---
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -199,7 +291,8 @@
 
             function displayNextQuestions() {
                 randomQuestionsContainer.innerHTML = '';
-                const questionsPerBatch = 3; // Zmieniono na 3 dla lepszej prezentacji
+                window.speechSynthesis.cancel();
+                const questionsPerBatch = 3; 
                 
                 if (currentQuestionIndex >= shuffledQuestions.length) {
                     currentQuestionIndex = 0;
@@ -229,7 +322,7 @@
                     listenBtn.innerHTML = '🔊 Odsłuchaj';
                     listenBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        speakText(qa.answer);
+                        speakText(qa.answer, listenBtn);
                     });
                     
                     answerContainer.appendChild(answerP);
@@ -243,6 +336,7 @@
                         if (isVisible) {
                             answerContainer.style.display = 'none';
                             window.speechSynthesis.cancel();
+                            listenBtn.innerHTML = '🔊 Odsłuchaj';
                         } else {
                             answerContainer.style.display = 'block';
                         }
@@ -250,9 +344,12 @@
 
                     randomQuestionsContainer.appendChild(card);
                 });
-                 refreshButton.textContent = `✨ Losuj kolejne ${Math.min(questionsPerBatch, shuffledQuestions.length - currentQuestionIndex) || questionsPerBatch} pytań`;
+                 const remaining = shuffledQuestions.length - currentQuestionIndex;
+                 const nextBatchSize = Math.min(questionsPerBatch, remaining > 0 ? remaining : shuffledQuestions.length);
+                 refreshButton.textContent = `✨ Losuj kolejne ${nextBatchSize} pytań`;
             }
 
+            // --- Tryb Egzaminatora ---
             function handleExaminerQuestion() {
                 const userInput = examinerInputField.value.trim().toLowerCase();
                 if (userInput === '') return;
@@ -284,6 +381,7 @@
                 }
             }
             
+            // --- Inicjalizacja Aplikacji ---
             examinerSubmitButton.addEventListener('click', handleExaminerQuestion);
             examinerInputField.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
