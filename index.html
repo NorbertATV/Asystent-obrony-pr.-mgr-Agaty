@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asystent Obrony Pracy Magisterskiej</title>
+    <style>
+        :root {
+            --primary-bg: #f5f5f5;
+            --secondary-bg: #ffffff;
+            --text-color: #333;
+            --accent-color: #007bff;
+            --border-color: #e0e0e0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .mode-section {
+            margin-top: 30px;
+        }
+        .question-card {
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        .question-card .question-text {
+            font-weight: bold;
+        }
+        .question-card .answer-text {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .examiner-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        .examiner-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .examiner-response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border-left: 4px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎓 Asystent Obrony Pracy Magisterskiej</h1>
+        
+        <div class="mode-section">
+            <h2>Losowe Pytania (Fiszki)</h2>
+            <p>Kliknij na pytanie, aby zobaczyć odpowiedź.</p>
+            <div id="random-questions-container"></div>
+        </div>
+
+        <div class="mode-section">
+            <h2>Tryb Egzaminatora</h2>
+            <p>Napisz własne pytanie i uzyskaj odpowiedź na podstawie pracy.</p>
+            <input type="text" id="examiner-input-field" class="examiner-input" placeholder="Wpisz swoje pytanie tutaj...">
+            <button id="examiner-submit-button" class="examiner-button">Zapytaj Asystenta</button>
+            <div id="examiner-response-container" class="examiner-response" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const questionsAndAnswers = [
+            // Baza wiedzy wygenerowana na podstawie Twojej pracy magisterskiej
+            { question: "Jaki jest główny cel badawczy Pani pracy magisterskiej?", answer: "Głównym celem pracy jest zidentyfikowanie i zrozumienie psychologicznych mechanizmów, za pomocą których emocje w komunikacji reklamowej wpływają na percepcję marki, kształtują postawy konsumenckie oraz budują długoterminową lojalność. Praca zmierza do odpowiedzi na pytanie, jak emocje wywoływane przez przekaz reklamowy wpływają na decyzje zakupowe i relację z konsumentem." },
+            { question: "Jak w Pani pracy zdefiniowano emocje i jakie pełnią one funkcje?", answer: "Emocje zdefiniowano jako złożone procesy psychofizjologiczne, które pełnią fundamentalne funkcje adaptacyjne, motywacyjne i społeczne. W kontekście konsumenckim, odgrywają kluczową rolę w procesach decyzyjnych, często wyprzedzając racjonalną analizę i działając jako heurystyczne wskaźniki wartości. Mają zdolność kierowania uwagi, wpływania na zapamiętywanie oraz budowania relacji." },
+            { question: "Proszę wyjaśnić, czym są emocje podstawowe i złożone według koncepcji przedstawionych w Pani pracy.", answer: "Emocje podstawowe, zgodnie z koncepcją Paula Ekmana, są wrodzone, uniwersalne i niezależne kulturowo. Należą do nich radość, smutek, złość, strach, zaskoczenie i wstręt. Z kolei emocje złożone, takie jak wstyd, zazdrość czy duma, powstają w wyniku kombinacji emocji podstawowych i są silnie kształtowane przez czynniki poznawcze, doświadczenie osobiste oraz normy społeczne." },
+            { question: "Jaką rolę, według Pani pracy, odgrywa storytelling w reklamie emocjonalnej?", answer: "Storytelling, czyli opowiadanie historii, jest jednym z najskuteczniejszych narzędzi w reklamie emocjonalnej. Angażuje odbiorców na głębokim, afektywnym poziomie, ponieważ ludzie są ewolucyjnie przystosowani do myślenia narracyjnego. Skuteczna historia pozwala na budowanie identyfikacji i empatii z bohaterami, co sprawia, że przekaz marki jest lepiej zapamiętywany i utrwalany w świadomości konsumenta jako część wspólnego doświadczenia." },
+            { question: "W jaki sposób muzyka i kolory, jako nośniki emocjonalne, wpływają na odbiór reklamy?", answer: "Muzyka jest potężnym nośnikiem, który tworzy atmosferę, wzmacnia emocje przekazu wizualnego i zwiększa zapamiętywalność marki. Kolory działają na poziomie podświadomym – na przykład czerwień symbolizuje energię i pasję, niebieski buduje zaufanie, a zieleń kojarzy się z naturą i zdrowiem. Świadome wykorzystanie tych elementów pozwala na strategiczne kształtowanie emocjonalnej percepcji i budowanie spójnego wizerunku marki." },
+            { question: "Dlaczego zdecydowała się Pani na metodę IDI (indywidualny wywiad pogłębiony) w badaniach?", answer: "Wybrałam metodę IDI, ponieważ pozwala ona na najgłębsze zrozumienie subiektywnych odczuć, myśli i skojarzeń, jakie reklamy emocjonalne wywołują u odbiorców. Umożliwiło to zebranie bogatego materiału empirycznego, niezbędnego do analizy ukrytych motywacji i osobistych interpretacji, co było kluczowe dla realizacji celów badawczych mojej pracy." },
+            { question: "Jakie są główne ograniczenia zastosowanej przez Panią metodologii badawczej?", answer: "Głównym ograniczeniem jest fakt, że badanie ma charakter jakościowy i opiera się na niewielkiej, nielosowej próbie. Oznacza to, że jego wyników nie można uogólniać statystycznie na całą populację. Należy również pamiętać o subiektywizmie interpretacji badacza oraz o tym, że sama sytuacja badawcza mogła wpłynąć na spontaniczność reakcji respondentów." },
+            { question: "Jakie cztery modele perswazji emocjonalnej zidentyfikowała Pani na podstawie analizy reklam?", answer: "Na podstawie analizy zidentyfikowałam cztery modele: 1) Model humanistyczno-wspólnotowy (T-Mobile), budujący ciepło i nadzieję. 2) Model narracyjno-katartyczny (Allegro), dostarczający oczyszczającego wzruszenia. 3) Model krytyczno-społeczny (Dove), wywołujący dyskomfort i refleksję. 4) Model rytualno-sensoryczny (McDonald's), bazujący na euforycznej ekscytacji i stymulacji zmysłów." },
+            { question: "Proszę porównać strategie emocjonalne marek Allegro i McDonald's na podstawie Pani badań.", answer: "Strategie te są skrajnie różne. Allegro stosuje model narracyjno-katartyczny, opowiadając uniwersalną, filmową historię o miłości i poświęceniu, by wywołać głębokie wzruszenie i zbudować wizerunek marki jako towarzysza życiowych dążeń. Z kolei McDonald's używa modelu rytualno-sensorycznego, kreując coroczny rytuał konsumencki. Ich reklama bazuje na euforycznej ekscytacji, oczekiwaniu (FOMO) i intensywnej stymulacji zmysłów, pozycjonując produkt jako natychmiastową, energetyczną nagrodę." },
+            { question: "Na czym polegał fenomen 'marketingu zaangażowanego' (purpose marketing) w kampanii Dove?", answer: "Kampania Dove jest przykładem marketingu zaangażowanego, ponieważ marka przyjęła rolę aktywisty społecznego. Zamiast promować produkt, celowo wywołała negatywne emocje, takie jak szok i lęk, aby zwrócić uwagę na realny problem społeczny – presję wizerunkową w social mediach. Taka strategia, choć ryzykowna, pozwoliła zbudować niezwykle silną i lojalną społeczność konsumentów, których z marką łączy nie produkt, lecz wspólnota wartości i poczucie misji." },
+            { question: "Jakie są, według Pani, praktyczne rekomendacje dla marketerów płynące z Pani pracy?", answer: "Kluczową rekomendacją jest konieczność autentyczności i spójności strategicznej. Marki muszą świadomie wybrać model emocjonalny zgodny z ich tożsamością – czy chcą opowiadać historie, tworzyć rytuały, czy być głosem w ważnej sprawie. Rekomenduję myślenie narracyjne zamiast produktocentrycznego, a w przypadku marketingu zaangażowanego – gotowość na długofalowe działania i ewentualne kontrowersje, aby uniknąć zarzutu hipokryzji." },
+            { question: "W jakim kierunku, według Pani, powinny zmierzać przyszłe badania nad rolą emocji w reklamie?", answer: "Przyszłe badania powinny skupić się na weryfikacji ilościowej zidentyfikowanych modeli, np. mierząc ich wpływ na wskaźniki sprzedaży i kapitał marki. Cenne byłyby również badania międzykulturowe, analizujące, jak te same komunikaty rezonują w różnych społeczeństwach. Perspektywicznym kierunkiem jest także zastosowanie narzędzi z obszaru neuromarketingu, takich jak fMRI czy EEG, aby zbadać nieuświadomione, fizjologiczne reakcje odbiorców na różne strategie emocjonalne." }
+        ];
+
+        // --- Logika Aplikacji ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const randomQuestionsContainer = document.getElementById('random-questions-container');
+            const examinerInputField = document.getElementById('examiner-input-field');
+            const examinerSubmitButton = document.getElementById('examiner-submit-button');
+            const examinerResponseContainer = document.getElementById('examiner-response-container');
+
+            // --- Tryb Fiszki ---
+            function displayRandomQuestions() {
+                randomQuestionsContainer.innerHTML = '';
+                const shuffled = [...questionsAndAnswers].sort(() => 0.5 - Math.random());
+                const selectedQuestions = shuffled.slice(0, 5);
+
+                selectedQuestions.forEach(qa => {
+                    const card = document.createElement('div');
+                    card.classList.add('question-card');
+                    
+                    const questionP = document.createElement('p');
+                    questionP.classList.add('question-text');
+                    questionP.textContent = qa.question;
+
+                    const answerP = document.createElement('p');
+                    answerP.classList.add('answer-text');
+                    answerP.textContent = qa.answer;
+
+                    card.appendChild(questionP);
+                    card.appendChild(answerP);
+                    
+                    card.addEventListener('click', () => {
+                        answerP.style.display = answerP.style.display === 'block' ? 'none' : 'block';
+                    });
+
+                    randomQuestionsContainer.appendChild(card);
+                });
+            }
+
+            // --- Tryb Egzaminatora ---
+            function handleExaminerQuestion() {
+                const userInput = examinerInputField.value.trim().toLowerCase();
+                if (userInput === '') return;
+
+                const searchTerms = userInput.split(' ').filter(term => term.length > 3);
+                let bestMatch = null;
+                let maxScore = 0;
+
+                questionsAndAnswers.forEach(qa => {
+                    let currentScore = 0;
+                    const questionText = qa.question.toLowerCase();
+                    searchTerms.forEach(term => {
+                        if (questionText.includes(term)) {
+                            currentScore++;
+                        }
+                    });
+
+                    if (currentScore > maxScore) {
+                        maxScore = currentScore;
+                        bestMatch = qa;
+                    }
+                });
+                
+                examinerResponseContainer.style.display = 'block';
+                if (bestMatch && maxScore > 0) {
+                    examinerResponseContainer.innerHTML = `<strong>Odpowiadając na podstawie pracy:</strong><br>${bestMatch.answer}`;
+                } else {
+                    examinerResponseContainer.textContent = 'Niestety, nie znalazłem bezpośredniej odpowiedzi na to pytanie w przygotowanej bazie wiedzy. Spróbuj przeformułować pytanie, używając słów kluczowych z pracy.';
+                }
+            }
+            
+            examinerSubmitButton.addEventListener('click', handleExaminerQuestion);
+            examinerInputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleExaminerQuestion();
+                }
+            });
+
+            // Inicjalizacja
+            displayRandomQuestions();
+        });
+    </script>
+
+</body>
+</html>
