@@ -164,7 +164,7 @@
         <div class="mode-section">
             <h2>Losowe Pytania Egzaminacyjne</h2>
             <p>Poniżej znajdują się typowe, otwarte pytania, jakie mogą paść na obronie. Kliknij, aby zobaczyć przykładową, wzorcową odpowiedź opartą na Twojej pracy.</p>
-            <div class="voice-selector-wrapper">
+            <div class="voice-selector-wrapper" id="voice-selector-wrapper">
                 <label for="voice-select">Wybierz lektora:</label>
                 <select id="voice-select"></select>
             </div>
@@ -194,7 +194,7 @@
             { question: "Proszę w kilku zdaniach przedstawić główną tezę badawczą, którą postawiła Pani w swojej pracy.", answer: "Główna teza badawcza mojej pracy zakłada, że skuteczność reklam emocjonalnych nie leży w sile pojedynczej emocji, lecz w spójności strategicznego modelu, który marka przyjmuje. Udowadniam, że poprzez świadome operowanie na różnych rejestrach emocji – od katartycznego wzruszenia, przez euforyczną ekscytację, aż po krytyczny dyskomfort – marki mogą nie tylko wpływać na decyzje zakupowe, ale fundamentalnie zmieniać swoją percepcję w oczach konsumentów, budując kapitał oparty na wspólnych wartościach i doświadczeniach." },
             { question: "Dlaczego zdecydowała się Pani na jakościową metodologię badań, a nie na przykład na badania ilościowe, ankietowe?", answer: "Zdecydowałam się na metodologię jakościową, a konkretnie na indywidualne wywiady pogłębione, ponieważ moim celem było dogłębne zrozumienie subiektywnych odczuć i ukrytych motywacji odbiorców. Badania ilościowe pozwoliłyby zmierzyć 'co' ludzie czują, ale to właśnie IDI pozwoliło odpowiedzieć na pytanie 'dlaczego' i 'jak' te emocje są przetwarzane. Chciałam uchwycić niuanse, osobiste skojarzenia i rezonans autobiograficzny, czego nie dałaby mi ankieta. Zależało mi na bogactwie danych, a nie na ich statystycznej reprezentatywności." },
             { question: "Jakie były największe wyzwania lub trudności, na jakie natrafiła Pani podczas realizacji części badawczej?", answer: "Największym wyzwaniem była obiektywna analiza i kategoryzacja bardzo subiektywnych, emocjonalnych wypowiedzi respondentów. Każda osoba inaczej interpretuje i nazywa swoje uczucia, dlatego kluczowe było znalezienie wspólnych wzorców i mechanizmów psychologicznych, które stały za tymi indywidualnymi reakcjami. Trudnością było również uniknięcie własnych uprzedzeń i interpretacji, aby jak najwierniej oddać perspektywę badanych osób. Wymagało to starannego przygotowania scenariusza wywiadu i rygorystycznej analizy zebranego materiału." },
-            { question: "Który z wniosków płynących z Pani badań był dla Pani najbardziej zaskakujący lub nieoczywisty?", answer: "Najbardziej zaskakująca była dla mnie potęga i skuteczność modelu krytyczno-społecznego, reprezentowanego przez kampanię Dove. Intuicyjnie zakładałam, że reklama, aby była skuteczna, musi wywoływać przyjemne odczucia. Tymczasem badanie dowiodło, że celowe wywołanie negatywnych emocji, takich jak lęk czy dyskomfort, może prowadzić do niezwykle silnego zaangażowania i zbudowania lojalności opartej na wspólnocie wartości. To pokazało, że rola reklamy ewoluuje w kierunku aktywizmu marki, co było dla mnie nieoczywistym odkryciem." },
+            { question: "Który z wniosków płynących z Pani badań był dla Pani najbardziej zaskakający lub nieoczywisty?", answer: "Najbardziej zaskakująca była dla mnie potęga i skuteczność modelu krytyczno-społecznego, reprezentowanego przez kampanię Dove. Intuicyjnie zakładałam, że reklama, aby była skuteczna, musi wywoływać przyjemne odczucia. Tymczasem badanie dowiodło, że celowe wywołanie negatywnych emocji, takich jak lęk czy dyskomfort, może prowadzić do niezwykle silnego zaangażowania i zbudowania lojalności opartej na wspólnocie wartości. To pokazało, że rola reklamy ewoluuje w kierunku aktywizmu marki, co było dla mnie nieoczywistym odkryciem." },
             { question: "Jaki jest, Pani zdaniem, najważniejszy wniosek płynący z Pani pracy?", answer: "Moim zdaniem, najważniejszy wniosek jest taki, że współczesny, świadomy konsument nie szuka w reklamie jedynie informacji o produkcie, ale wartości i autentycznego doświadczenia. Sukces marek takich jak Allegro czy Dove dowodzi, że najtrwalszą więź buduje się poprzez opowiadanie uniwersalnych, ludzkich historii lub odważne zabieranie głosu w ważnych sprawach społecznych. To pokazuje fundamentalną zmianę w komunikacji marketingowej – przejście od perswazji do budowania relacji opartych na empatii i wspólnych wartościach." },
             { question: "Jakie widzi Pani praktyczne zastosowania wniosków ze swojej pracy? Kto mógłby z nich skorzystać?", answer: "Wnioski mają szerokie zastosowanie praktyczne, przede wszystkim dla marketerów i strategów marek. Moja praca dostarcza im typologii modeli emocjonalnych, która może pomóc w świadomym projektowaniu kampanii zgodnych z tożsamością ich marki. Zrozumienie, czy marka ma być 'pomocnikiem' jak Allegro, 'aktywistą' jak Dove, czy 'kreatorem rytuału' jak McDonald's, jest kluczowe dla jej sukcesu. Poza tym, praca może być przydatna dla studentów marketingu i psychologii oraz dla świadomych konsumentów, pomagając im w krytycznym odbiorze przekazów reklamowych." },
             { question: "Jakie są główne ograniczenia przeprowadzonych przez Panią badań?", answer: "Jestem świadoma głównych ograniczeń mojej pracy. Przede wszystkim, jako badanie o charakterze jakościowym, opierało się ono na niewielkiej, celowo dobranej próbie, co oznacza, że jego wyników nie można uogólniać statystycznie na całą populację. Ponadto, istnieje element subiektywnej interpretacji badacza, nieodłączny dla analizy danych jakościowych. Istotnym ograniczeniem jest też sztuczność samej sytuacji badawczej, która mogła wpłynąć na spontaniczność reakcji respondentów w porównaniu do naturalnego odbioru reklamy w domu." },
@@ -234,33 +234,47 @@
             const refreshButton = document.getElementById('refresh-button');
             const voiceInputButton = document.getElementById('voice-input-button');
             const voiceSelect = document.getElementById('voice-select');
+            const voiceSelectorWrapper = document.getElementById('voice-selector-wrapper');
 
             // --- Logika Syntezatora Mowy (TTS) ---
             function populateVoiceList() {
-                voices = window.speechSynthesis.getVoices();
-                voiceSelect.innerHTML = '';
-                voices.filter(voice => voice.lang === 'pl-PL')
-                      .forEach(voice => {
-                          const option = document.createElement('option');
-                          option.textContent = `${voice.name} (${voice.lang})`;
-                          option.setAttribute('data-lang', voice.lang);
-                          option.setAttribute('data-name', voice.name);
-                          voiceSelect.appendChild(option);
-                      });
+                try {
+                    voices = window.speechSynthesis.getVoices();
+                    voiceSelect.innerHTML = '';
+                    const polishVoices = voices.filter(voice => voice.lang === 'pl-PL');
+                    
+                    if (polishVoices.length > 0) {
+                        voiceSelectorWrapper.style.display = 'block';
+                        polishVoices.forEach(voice => {
+                            const option = document.createElement('option');
+                            option.textContent = `${voice.name} (${voice.lang})`;
+                            option.setAttribute('data-lang', voice.lang);
+                            option.setAttribute('data-name', voice.name);
+                            voiceSelect.appendChild(option);
+                        });
+                    } else {
+                        voiceSelectorWrapper.style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error("Błąd podczas ładowania głosów:", e);
+                    voiceSelectorWrapper.style.display = 'none';
+                }
             }
 
             function speakText(textToSpeak, button) {
                 if ('speechSynthesis' in window) {
                     if (window.speechSynthesis.speaking) {
                         window.speechSynthesis.cancel();
-                        return;
+                        return; // Przycisk działa jak 'stop'
                     }
                     window.speechSynthesis.cancel(); 
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
                     const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
-                    const selectedVoice = voices.find(voice => voice.name === selectedOption.getAttribute('data-name'));
+                    if (selectedOption) {
+                        const selectedVoice = voices.find(voice => voice.name === selectedOption.getAttribute('data-name'));
+                        utterance.voice = selectedVoice;
+                    }
                     
-                    utterance.voice = selectedVoice;
                     utterance.lang = 'pl-PL';
                     utterance.rate = 0.95;
 
@@ -279,10 +293,16 @@
                 }
             }
             
-            populateVoiceList();
-            if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = populateVoiceList;
+            // Inicjalizacja listy głosów
+            if ('speechSynthesis' in window) {
+                populateVoiceList();
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = populateVoiceList;
+                }
+            } else {
+                voiceSelectorWrapper.style.display = 'none';
             }
+
 
             // --- Logika Rozpoznawania Mowy ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -293,7 +313,11 @@
                 recognition.maxAlternatives = 1;
 
                 voiceInputButton.addEventListener('click', () => {
-                    recognition.start();
+                    try {
+                        recognition.start();
+                    } catch(e) {
+                        alert("Rozpoznawanie mowy jest już aktywne.");
+                    }
                 });
 
                 recognition.onstart = () => {
@@ -333,63 +357,75 @@
             }
 
             function displayNextQuestions() {
-                randomQuestionsContainer.innerHTML = '';
-                window.speechSynthesis.cancel();
-                const questionsPerBatch = 3; 
-                
-                if (currentQuestionIndex >= shuffledQuestions.length) {
-                    currentQuestionIndex = 0;
-                    shuffleArray(shuffledQuestions);
-                }
-
-                const questionsToShow = shuffledQuestions.slice(currentQuestionIndex, currentQuestionIndex + questionsPerBatch);
-                currentQuestionIndex += questionsPerBatch;
-
-                questionsToShow.forEach(qa => {
-                    const card = document.createElement('div');
-                    card.classList.add('question-card');
+                try {
+                    randomQuestionsContainer.innerHTML = '';
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                    }
+                    const questionsPerBatch = 3; 
                     
-                    const questionP = document.createElement('p');
-                    questionP.classList.add('question-text');
-                    questionP.textContent = qa.question;
-                    
-                    const answerContainer = document.createElement('div');
-                    answerContainer.classList.add('answer-container');
+                    if (currentQuestionIndex >= shuffledQuestions.length) {
+                        currentQuestionIndex = 0;
+                        shuffleArray(shuffledQuestions);
+                    }
 
-                    const answerP = document.createElement('p');
-                    answerP.classList.add('answer-text');
-                    answerP.textContent = qa.answer;
+                    const questionsToShow = shuffledQuestions.slice(currentQuestionIndex, currentQuestionIndex + questionsPerBatch);
+                    currentQuestionIndex += questionsPerBatch;
 
-                    const listenBtn = document.createElement('button');
-                    listenBtn.classList.add('listen-button');
-                    listenBtn.innerHTML = '🔊 Odsłuchaj';
-                    listenBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        speakText(qa.answer, listenBtn);
-                    });
-                    
-                    answerContainer.appendChild(answerP);
-                    answerContainer.appendChild(listenBtn);
+                    questionsToShow.forEach(qa => {
+                        const card = document.createElement('div');
+                        card.classList.add('question-card');
+                        
+                        const questionP = document.createElement('p');
+                        questionP.classList.add('question-text');
+                        questionP.textContent = qa.question;
+                        
+                        const answerContainer = document.createElement('div');
+                        answerContainer.classList.add('answer-container');
 
-                    card.appendChild(questionP);
-                    card.appendChild(answerContainer);
-                    
-                    card.addEventListener('click', () => {
-                        const isVisible = answerContainer.style.display === 'block';
-                        if (isVisible) {
-                            answerContainer.style.display = 'none';
-                            window.speechSynthesis.cancel();
-                            listenBtn.innerHTML = '🔊 Odsłuchaj';
-                        } else {
-                            answerContainer.style.display = 'block';
+                        const answerP = document.createElement('p');
+                        answerP.classList.add('answer-text');
+                        answerP.textContent = qa.answer;
+
+                        const listenBtn = document.createElement('button');
+                        listenBtn.classList.add('listen-button');
+                        listenBtn.innerHTML = '🔊 Odsłuchaj';
+                        if (!('speechSynthesis' in window)) {
+                           listenBtn.style.display = 'none';
                         }
-                    });
+                        listenBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            speakText(qa.answer, listenBtn);
+                        });
+                        
+                        answerContainer.appendChild(answerP);
+                        answerContainer.appendChild(listenBtn);
 
-                    randomQuestionsContainer.appendChild(card);
-                });
-                 const remaining = shuffledQuestions.length - currentQuestionIndex;
-                 const nextBatchSize = Math.min(questionsPerBatch, remaining > 0 ? remaining : shuffledQuestions.length);
-                 refreshButton.textContent = `✨ Losuj kolejne ${nextBatchSize} pytań`;
+                        card.appendChild(questionP);
+                        card.appendChild(answerContainer);
+                        
+                        card.addEventListener('click', () => {
+                            const isVisible = answerContainer.style.display === 'block';
+                            if (isVisible) {
+                                answerContainer.style.display = 'none';
+                                if ('speechSynthesis' in window) {
+                                    window.speechSynthesis.cancel();
+                                }
+                                listenBtn.innerHTML = '🔊 Odsłuchaj';
+                            } else {
+                                answerContainer.style.display = 'block';
+                            }
+                        });
+
+                        randomQuestionsContainer.appendChild(card);
+                    });
+                    const remaining = shuffledQuestions.length - currentQuestionIndex;
+                    const nextBatchSize = Math.min(questionsPerBatch, remaining > 0 ? remaining : shuffledQuestions.length);
+                    refreshButton.textContent = `✨ Losuj kolejne ${nextBatchSize} pytań`;
+                } catch(e) {
+                    console.error("Błąd podczas wyświetlania pytań:", e);
+                    randomQuestionsContainer.innerHTML = "<p>Wystąpił błąd podczas ładowania pytań. Spróbuj odświeżyć stronę.</p>";
+                }
             }
 
             // --- Tryb Egzaminatora ---
