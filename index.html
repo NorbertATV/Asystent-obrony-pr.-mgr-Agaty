@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -6,11 +6,12 @@
     <title>Asystent Obrony Pracy Magisterskiej</title>
     <style>
         :root {
-            --primary-bg: #f5f5f5;
+            --primary-bg: #f8f9fa;
             --secondary-bg: #ffffff;
-            --text-color: #333;
-            --accent-color: #007bff;
-            --border-color: #e0e0e0;
+            --text-color: #212529;
+            --accent-color: #0056b3;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0,0,0,0.05);
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -18,15 +19,15 @@
             padding: 20px;
             background-color: var(--primary-bg);
             color: var(--text-color);
-            line-height: 1.6;
+            line-height: 1.7;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
             background-color: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px var(--shadow-color);
         }
         h1, h2 {
             text-align: center;
@@ -35,34 +36,60 @@
             padding-bottom: 10px;
         }
         .mode-section {
-            margin-top: 30px;
+            margin-top: 35px;
         }
         .question-card {
-            background-color: var(--primary-bg);
+            background-color: #fff;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 8px var(--shadow-color);
         }
         .question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         }
         .question-card .question-text {
             font-weight: bold;
+            font-size: 1.1em;
         }
-        .question-card .answer-text {
+        .answer-container {
             display: none;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px dashed var(--border-color);
             animation: fadeIn 0.5s;
         }
+        .answer-image {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .answer-text {
+            margin-bottom: 10px;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .listen-button {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .listen-button:hover {
+            background-color: #e9f5ff;
         }
         .examiner-input {
             width: 100%;
@@ -99,7 +126,7 @@
         
         <div class="mode-section">
             <h2>Losowe Pytania (Fiszki)</h2>
-            <p>Kliknij na pytanie, aby zobaczyć odpowiedź.</p>
+            <p>Kliknij na pytanie, aby zobaczyć odpowiedź. Kliknij 🔊, aby odsłuchać.</p>
             <div id="random-questions-container"></div>
         </div>
 
@@ -113,20 +140,53 @@
     </div>
 
     <script>
+        // --- Rozbudowana Baza Wiedzy (40 pytań) ---
         const questionsAndAnswers = [
-            // Baza wiedzy wygenerowana na podstawie Twojej pracy magisterskiej
-            { question: "Jaki jest główny cel badawczy Pani pracy magisterskiej?", answer: "Głównym celem pracy jest zidentyfikowanie i zrozumienie psychologicznych mechanizmów, za pomocą których emocje w komunikacji reklamowej wpływają na percepcję marki, kształtują postawy konsumenckie oraz budują długoterminową lojalność. Praca zmierza do odpowiedzi na pytanie, jak emocje wywoływane przez przekaz reklamowy wpływają na decyzje zakupowe i relację z konsumentem." },
-            { question: "Jak w Pani pracy zdefiniowano emocje i jakie pełnią one funkcje?", answer: "Emocje zdefiniowano jako złożone procesy psychofizjologiczne, które pełnią fundamentalne funkcje adaptacyjne, motywacyjne i społeczne. W kontekście konsumenckim, odgrywają kluczową rolę w procesach decyzyjnych, często wyprzedzając racjonalną analizę i działając jako heurystyczne wskaźniki wartości. Mają zdolność kierowania uwagi, wpływania na zapamiętywanie oraz budowania relacji." },
-            { question: "Proszę wyjaśnić, czym są emocje podstawowe i złożone według koncepcji przedstawionych w Pani pracy.", answer: "Emocje podstawowe, zgodnie z koncepcją Paula Ekmana, są wrodzone, uniwersalne i niezależne kulturowo. Należą do nich radość, smutek, złość, strach, zaskoczenie i wstręt. Z kolei emocje złożone, takie jak wstyd, zazdrość czy duma, powstają w wyniku kombinacji emocji podstawowych i są silnie kształtowane przez czynniki poznawcze, doświadczenie osobiste oraz normy społeczne." },
-            { question: "Jaką rolę, według Pani pracy, odgrywa storytelling w reklamie emocjonalnej?", answer: "Storytelling, czyli opowiadanie historii, jest jednym z najskuteczniejszych narzędzi w reklamie emocjonalnej. Angażuje odbiorców na głębokim, afektywnym poziomie, ponieważ ludzie są ewolucyjnie przystosowani do myślenia narracyjnego. Skuteczna historia pozwala na budowanie identyfikacji i empatii z bohaterami, co sprawia, że przekaz marki jest lepiej zapamiętywany i utrwalany w świadomości konsumenta jako część wspólnego doświadczenia." },
-            { question: "W jaki sposób muzyka i kolory, jako nośniki emocjonalne, wpływają na odbiór reklamy?", answer: "Muzyka jest potężnym nośnikiem, który tworzy atmosferę, wzmacnia emocje przekazu wizualnego i zwiększa zapamiętywalność marki. Kolory działają na poziomie podświadomym – na przykład czerwień symbolizuje energię i pasję, niebieski buduje zaufanie, a zieleń kojarzy się z naturą i zdrowiem. Świadome wykorzystanie tych elementów pozwala na strategiczne kształtowanie emocjonalnej percepcji i budowanie spójnego wizerunku marki." },
-            { question: "Dlaczego zdecydowała się Pani na metodę IDI (indywidualny wywiad pogłębiony) w badaniach?", answer: "Wybrałam metodę IDI, ponieważ pozwala ona na najgłębsze zrozumienie subiektywnych odczuć, myśli i skojarzeń, jakie reklamy emocjonalne wywołują u odbiorców. Umożliwiło to zebranie bogatego materiału empirycznego, niezbędnego do analizy ukrytych motywacji i osobistych interpretacji, co było kluczowe dla realizacji celów badawczych mojej pracy." },
-            { question: "Jakie są główne ograniczenia zastosowanej przez Panią metodologii badawczej?", answer: "Głównym ograniczeniem jest fakt, że badanie ma charakter jakościowy i opiera się na niewielkiej, nielosowej próbie. Oznacza to, że jego wyników nie można uogólniać statystycznie na całą populację. Należy również pamiętać o subiektywizmie interpretacji badacza oraz o tym, że sama sytuacja badawcza mogła wpłynąć na spontaniczność reakcji respondentów." },
-            { question: "Jakie cztery modele perswazji emocjonalnej zidentyfikowała Pani na podstawie analizy reklam?", answer: "Na podstawie analizy zidentyfikowałam cztery modele: 1) Model humanistyczno-wspólnotowy (T-Mobile), budujący ciepło i nadzieję. 2) Model narracyjno-katartyczny (Allegro), dostarczający oczyszczającego wzruszenia. 3) Model krytyczno-społeczny (Dove), wywołujący dyskomfort i refleksję. 4) Model rytualno-sensoryczny (McDonald's), bazujący na euforycznej ekscytacji i stymulacji zmysłów." },
-            { question: "Proszę porównać strategie emocjonalne marek Allegro i McDonald's na podstawie Pani badań.", answer: "Strategie te są skrajnie różne. Allegro stosuje model narracyjno-katartyczny, opowiadając uniwersalną, filmową historię o miłości i poświęceniu, by wywołać głębokie wzruszenie i zbudować wizerunek marki jako towarzysza życiowych dążeń. Z kolei McDonald's używa modelu rytualno-sensorycznego, kreując coroczny rytuał konsumencki. Ich reklama bazuje na euforycznej ekscytacji, oczekiwaniu (FOMO) i intensywnej stymulacji zmysłów, pozycjonując produkt jako natychmiastową, energetyczną nagrodę." },
-            { question: "Na czym polegał fenomen 'marketingu zaangażowanego' (purpose marketing) w kampanii Dove?", answer: "Kampania Dove jest przykładem marketingu zaangażowanego, ponieważ marka przyjęła rolę aktywisty społecznego. Zamiast promować produkt, celowo wywołała negatywne emocje, takie jak szok i lęk, aby zwrócić uwagę na realny problem społeczny – presję wizerunkową w social mediach. Taka strategia, choć ryzykowna, pozwoliła zbudować niezwykle silną i lojalną społeczność konsumentów, których z marką łączy nie produkt, lecz wspólnota wartości i poczucie misji." },
-            { question: "Jakie są, według Pani, praktyczne rekomendacje dla marketerów płynące z Pani pracy?", answer: "Kluczową rekomendacją jest konieczność autentyczności i spójności strategicznej. Marki muszą świadomie wybrać model emocjonalny zgodny z ich tożsamością – czy chcą opowiadać historie, tworzyć rytuały, czy być głosem w ważnej sprawie. Rekomenduję myślenie narracyjne zamiast produktocentrycznego, a w przypadku marketingu zaangażowanego – gotowość na długofalowe działania i ewentualne kontrowersje, aby uniknąć zarzutu hipokryzji." },
-            { question: "W jakim kierunku, według Pani, powinny zmierzać przyszłe badania nad rolą emocji w reklamie?", answer: "Przyszłe badania powinny skupić się na weryfikacji ilościowej zidentyfikowanych modeli, np. mierząc ich wpływ na wskaźniki sprzedaży i kapitał marki. Cenne byłyby również badania międzykulturowe, analizujące, jak te same komunikaty rezonują w różnych społeczeństwach. Perspektywicznym kierunkiem jest także zastosowanie narzędzi z obszaru neuromarketingu, takich jak fMRI czy EEG, aby zbadać nieuświadomione, fizjologiczne reakcje odbiorców na różne strategie emocjonalne." }
+            // Kategoria: Podstawy teoretyczne i definicje
+            [cite_start]{ question: "Jaki jest główny cel badawczy i kluczowe pytanie, na które próbuje odpowiedzieć Pani praca magisterska?", answer: "Głównym celem pracy jest zidentyfikowanie i zrozumienie psychologicznych mechanizmów, za pomocą których emocje w komunikacji reklamowej wpływają na percepcję marki, postawy i lojalność konsumentów[cite: 30, 1365]. [cite_start]Kluczowe pytanie badawcze brzmi: w jaki sposób emocje, wywoływane przez różnorodne elementy przekazu reklamowego, wpływają na postrzeganie marki, kształtują decyzje zakupowe oraz budują długotrwałą relację z konsumentem? [cite: 32] [cite_start]Praca analizuje to zarówno w wymiarze teoretycznym, jak i praktycznym, na podstawie badań jakościowych[cite: 46, 47]." },
+            [cite_start]{ question: "Jak w Pani pracy zdefiniowano emocje i jaka jest etymologia tego słowa?", answer: "Emocje zdefiniowano jako złożone reakcje organizmu na bodźce wewnętrzne lub zewnętrzne, które mają znaczenie dla jednostki[cite: 70]. [cite_start]Obejmują one zmiany fizjologiczne, subiektywne odczucia, ocenę sytuacyjną oraz tendencje do określonego zachowania[cite: 71]. [cite_start]Etymologicznie, słowo 'emocja' pochodzi od łacińskiego terminu 'emovere', oznaczającego 'poruszać, wzruszać' [cite: 66][cite_start], co wskazuje na ich dynamiczny charakter, uruchamiający aktywność fizyczną i psychiczną organizmu[cite: 67]." },
+            [cite_start]{ question: "Proszę omówić teorię Jamesa-Langego w kontekście powstawania emocji.", answer: "Teoria Jamesa-Langego, jedna z najstarszych w psychologii, postuluje, że emocje są rezultatem naszych reakcji fizjologicznych na bodźce, a nie ich przyczyną[cite: 74]. [cite_start]Oznacza to, że nie boimy się, dlatego, że widzimy niedźwiedzia, ale odczuwamy strach, ponieważ nasze ciało już zareagowało – serce zaczęło bić szybciej, a mięśnie się napięły[cite: 75]. [cite_start]W tym ujęciu, to świadoma interpretacja tych zmian somatycznych jest tym, co nazywamy emocją[cite: 75]. [cite_start]Teoria ta została później skrytykowana i uzupełniona przez model Cannona-Barda, który zakładał jednoczesne pojawianie się emocji i reakcji fizjologicznych[cite: 77]." },
+            [cite_start]{ question: "Jakie jest kognitywne podejście do emocji, zwłaszcza w ujęciu Richarda Lazarusa?", answer: "Podejście kognitywne, które zyskało na znaczeniu w drugiej połowie XX wieku, zakłada, że emocje są wynikiem oceny poznawczej, czyli interpretacji znaczenia danej sytuacji dla jednostki[cite: 78]. Richard Lazarus podkreślał kluczową rolę tzw. [cite_start]'pierwotnej oceny'[cite: 79]. W tym procesie jednostka najpierw ocenia, czy sytuacja ma dla niej osobiste znaczenie – czy jest zagrażająca, korzystna czy neutralna. Dopiero po tej ocenie pojawia się adekwatna emocja. [cite_start]Oznacza to, że to nie bodziec sam w sobie, ale nasza interpretacja tego bodźca jest bezpośrednią przyczyną reakcji emocjonalnej[cite: 79]." },
+            [cite_start]{ question: "Czym są emocje podstawowe według Paula Ekmana i jakie kryteria je wyróżniają?", answer: "Emocje podstawowe, zgodnie z koncepcją Paula Ekmana, to te, które są wrodzone, uniwersalne i niezależne kulturowo[cite: 87]. [cite_start]Ekman, na podstawie badań międzykulturowych, zidentyfikował sześć takich emocji: radość, smutek, złość, strach, zaskoczenie i wstręt[cite: 88]. [cite_start]Cechują się one charakterystyczną, rozpoznawalną we wszystkich kulturach mimiką twarzy, szybkim pojawianiem się, automatyzmem reakcji oraz powiązaniem z określonymi strukturami w mózgu[cite: 89, 90]." },
+            [cite_start]{ question: "Proszę opisać model koła emocji Roberta Plutchika.", answer: "Model koła emocji Roberta Plutchika przedstawia osiem emocji podstawowych, ułożonych w parach opozycyjnych: radość-smutek, zaufanie(akceptacja)-wstręt, strach-złość oraz zaskoczenie-oczekiwanie[cite: 98]. [cite_start]Model ten pokazuje również, że emocje różnią się intensywnością (np. złość może eskalować do gniewu, a następnie furii)[cite: 100]. [cite_start]Ponadto, Plutchik zakładał, że emocje podstawowe mogą łączyć się w bardziej złożone stany, tworząc np. optymizm (radość + oczekiwanie) czy agresję (złość + oczekiwanie)[cite: 99]." },
+            { question: "Jakie są, według Pani pracy, kluczowe funkcje emocji?", answer: "Praca wyróżnia cztery kluczowe funkcje emocji. [cite_start]Po pierwsze, funkcję adaptacyjną, która umożliwia szybką ocenę sytuacji i reakcję w celu przetrwania (np. strach motywuje do ucieczki)[cite: 109, 110]. [cite_start]Po drugie, funkcję społeczną, polegającą na komunikowaniu stanów wewnętrznych i intencji, co reguluje interakcje w grupie[cite: 114, 116]. [cite_start]Po trzecie, funkcję motywacyjną, gdzie emocje stanowią wewnętrzne sygnały kierujące naszym działaniem[cite: 120, 121]. [cite_start]Po czwarte, funkcję poznawczą, polegającą na wpływie na procesy takie jak uwaga, pamięć i podejmowanie decyzji[cite: 126]." },
+            [cite_start]{ question: "Czym jest inteligencja emocjonalna i jakie komponenty się na nią składają?", answer: "Inteligencja emocjonalna, koncepcja spopularyzowana przez Daniela Golemana, to zdolność do rozpoznawania, rozumienia i zarządzania emocjami – zarówno własnymi, jak i innych ludzi[cite: 142]. [cite_start]Składa się na nią kilka kluczowych komponentów: świadomość własnych emocji, zdolność do ich regulacji, rozumienie emocji innych ludzi oraz umiejętność zarządzania relacjami[cite: 143, 144, 145, 146]. [cite_start]Wysoki poziom inteligencji emocjonalnej koreluje z lepszym zdrowiem psychicznym, sukcesem zawodowym i życiem społecznym[cite: 147]." },
+            { question: "Jak kultura wpływa na sposób przeżywania i wyrażania emocji?", answer: "Kultura i normy społeczne mają ogromny wpływ na emocje. [cite_start]Praca wskazuje na różnice między kulturami indywidualistycznymi (np. kraje zachodnie), gdzie ceni się autentyczność i swobodną ekspresję [cite: 151][cite_start], a kolektywistycznymi (np. kraje azjatyckie), gdzie większy nacisk kładzie się na tłumienie emocji w celu zachowania harmonii społecznej[cite: 150]. [cite_start]Kontekst kulturowy determinuje również, które emocje są społecznie akceptowane w zależności od płci czy sytuacji, co kształtuje rozwój emocjonalny jednostki[cite: 152]." },
+            { question: "Na czym polega teoria poszerzania i budowania (broaden-and-build theory) Barbary Fredrickson?", answer: "Teoria poszerzania i budowania Barbary Fredrickson koncentruje się na funkcjach emocji pozytywnych. [cite_start]Zgodnie z nią, emocje takie jak radość, zainteresowanie czy spokój poszerzają nasz chwilowy repertuar myśli i działań, czyniąc nas bardziej kreatywnymi i otwartymi na nowe doświadczenia[cite: 168]. [cite_start]W dłuższej perspektywie, te poszerzone horyzonty sprzyjają budowaniu trwałych zasobów osobistych – fizycznych, intelektualnych, społecznych i psychologicznych, takich jak optymizm czy odporność[cite: 168]." },
+            
+            // Kategoria: Mechanizmy psychologiczne w reklamie
+            [cite_start]{ question: "W jaki sposób emocje wpływają na procesy pamięciowe w kontekście konsumenckim?", answer: "Emocje pełnią funkcję 'kleju' w procesach pamięciowych[cite: 320]. Doświadczenia nacechowane emocjonalnie są lepiej kodowane i łatwiej odtwarzane niż te neutralne. [cite_start]Dzieje się tak, ponieważ silne emocje aktywują ciało migdałowate w mózgu, które współpracuje z hipokampem w procesie konsolidacji pamięci[cite: 218]. [cite_start]W kontekście konsumenckim oznacza to, że reklama wywołująca radość, wzruszenie czy nawet strach, ma większą szansę na trwałe zapisanie się w pamięci i zbudowanie silnych skojarzeń z marką[cite: 217, 219]." },
+            [cite_start]{ question: "Proszę wyjaśnić 'efekt szczytu i końca' (peak-end rule) i jego znaczenie dla marketingu.", answer: "Efekt szczytu i końca, opisany przez Kahnemana i Fredricksona, to reguła psychologiczna mówiąca, że ludzie nie oceniają doświadczeń na podstawie ich średniego przebiegu[cite: 228]. [cite_start]Zamiast tego, nasza pamięć i ocena danego zdarzenia są zdominowane przez dwa momenty: najbardziej intensywny emocjonalnie moment (szczyt) oraz sam koniec doświadczenia[cite: 229]. [cite_start]W marketingu oznacza to, że aby zbudować pozytywne wspomnienie o marce, należy zadbać o wyjątkowo pozytywny moment kulminacyjny w interakcji z klientem oraz o perfekcyjne i przyjemne zakończenie tej interakcji[cite: 230]." },
+            [cite_start]{ question: "Czym jest Elaboration Likelihood Model (ELM) i jakie ma znaczenie dla reklamy emocjonalnej?", answer: "Model Dwutorowości Perswazji (ELM) autorstwa Petty'ego i Cacioppo zakłada, że odbiorcy przetwarzają komunikaty perswazyjne dwoma ścieżkami: centralną i peryferyjną[cite: 329]. [cite_start]Ścieżka centralna to głęboka, analityczna ocena argumentów, podczas gdy peryferyjna opiera się na prostszych wskazówkach i heurystykach[cite: 330, 333]. [cite_start]Reklama emocjonalna często aktywuje ścieżkę peryferyjną – pozytywne emocje wywołane przez muzykę czy obraz mogą prowadzić do pozytywnej oceny marki bez szczegółowej analizy jej cech, zwłaszcza gdy odbiorca ma niską motywację do przetwarzania informacji[cite: 270, 337]." },
+            [cite_start]{ question: "Jakie znaczenie dla kształtowania postaw wobec marki ma 'efekt aureoli' (halo effect)?", answer: "Efekt aureoli to zjawisko, w którym ogólne pozytywne wrażenie na temat marki rozlewa się na ocenę jej poszczególnych atrybutów[cite: 365]. [cite_start]Jeśli reklama wywoła pozytywne emocje, np. poprzez estetykę wizualną, konsument może nieświadomie przypisać reklamowanemu produktowi cechy takie jak wysoka jakość czy niezawodność, nawet bez obiektywnych dowodów[cite: 367, 368]. [cite_start]Jest to potężny mechanizm, ponieważ pierwsze, emocjonalne wrażenie może trwale ukształtować całościową, długoterminową percepcję marki[cite: 358]." },
+            [cite_start]{ question: "Czym jest 'zarażanie emocjonalne' (emotional contagion) i jak jest wykorzystywane w komunikacji?", answer: "Zarażanie emocjonalne to naturalna, często nieświadoma tendencja ludzi do naśladowania i synchronizowania swoich stanów emocjonalnych ze stanami emocjonalnymi innych[cite: 530]. [cite_start]W komunikacji oznacza to, że emocje wyrażane przez nadawcę – np. radość i entuzjazm aktora w reklamie – mogą być automatycznie 'przenoszone' na odbiorców[cite: 531]. [cite_start]To zjawisko buduje wspólne doświadczenie, wzmacnia empatię i w efekcie potęguje zaangażowanie w przekaz[cite: 587]." },
+            [cite_start]{ question: "Jaką rolę w budowaniu lojalności konsumenckiej odgrywa przywiązanie emocjonalne do marki?", answer: "Przywiązanie emocjonalne jest fundamentem lojalności, która jest znacznie trwalsza niż ta oparta na przesłankach racjonalnych, jak cena[cite: 401, 402]. Kiedy konsument odczuwa silne, pozytywne emocje w stosunku do marki, rozwija się więź wykraczająca poza kalkulację kosztów i korzyści. [cite_start]Taki konsument jest mniej wrażliwy na oferty konkurencji, bardziej wyrozumiały wobec błędów marki i chętniej staje się jej adwokatem, aktywnie ją polecając[cite: 405, 407, 408]." },
+            { question: "Jakie emocje pozytywne, według Pani pracy, najskuteczniej angażują odbiorców?", answer: "Praca identyfikuje kilka kluczowych emocji pozytywnych. [cite_start]Radość/szczęście, ponieważ ludzie chcą dzielić się pozytywnymi doświadczeniami, co sprzyja wirusowemu rozprzestrzenianiu treści[cite: 535]. [cite_start]Ciekawość, która tworzy 'lukę informacyjną' motywującą do dłuższego skupienia uwagi[cite: 537]. [cite_start]Zaskoczenie, które przełamuje rutynę i zwiększa zapamiętywalność[cite: 538]. [cite_start]Nadzieja/optymizm, motywujące do działania w kontekście problemów [cite: 540][cite_start], oraz inspiracja, która rezonuje z osobistymi aspiracjami odbiorców[cite: 541]." },
+            { question: "Czy emocje negatywne mogą być skuteczne w reklamie? Proszę podać przykłady.", answer: "Tak, emocje negatywne mogą być bardzo skuteczne, jeśli są odpowiednio ukierunkowane. [cite_start]Strach jest potężnym motywatorem w kampaniach społecznych, np. antynikotynowych, ale musi być połączony z informacją o możliwym rozwiązaniu[cite: 543, 544]. [cite_start]Gniew i oburzenie, np. wobec niesprawiedliwości, silnie mobilizują do działania i protestu[cite: 546]. [cite_start]Smutek i współczucie, aktywując empatię, są często wykorzystywane w kampaniach charytatywnych, by motywować do pomocy[cite: 548]." },
+            [cite_start]{ question: "Na czym polega Teoria Oceny Poznawczej (Appraisal Theory) i jakie ma znaczenie dla komunikacji?", answer: "Teoria Oceny Poznawczej zakłada, że emocje nie są biernymi reakcjami, lecz wynikają z subiektywnej oceny i interpretacji wydarzeń[cite: 527]. [cite_start]To, czy postrzegamy sytuację jako zagrożenie, szansę czy niesprawiedliwość, decyduje o tym, jaka emocja się w nas pojawi[cite: 580]. [cite_start]Dla komunikacji ma to kluczowe znaczenie, ponieważ oznacza, że siła zaangażowania zależy od sposobu skonstruowania przekazu, tak aby wywołać w odbiorcy konkretne oceny poznawcze, które z kolei uruchomią pożądaną reakcję emocjonalną[cite: 581]." },
+            { question: "Jakie czynniki, oprócz samej treści, wpływają na skuteczność emocji w angażowaniu odbiorców?", answer: "Skuteczność zależy od wielu czynników. [cite_start]Kluczowy jest kontekst komunikacyjny – rodzaj wiadomości i platforma[cite: 554]. [cite_start]Niezwykle ważna jest charakterystyka odbiorcy – jego osobowość, wartości i kultura[cite: 555]. [cite_start]Fundamentalne znaczenie ma również wiarygodność nadawcy, ponieważ emocje przekazywane przez niewiarygodne źródło są odbierane jako manipulacja[cite: 557]. [cite_start]Istotna jest także intensywność emocji – zarówno zbyt słabe, jak i zbyt silne mogą być nieskuteczne[cite: 558]." },
+            
+            // Kategoria: Analiza badań i wnioski
+            [cite_start]{ question: "Jakie cztery konkretne reklamy były przedmiotem Pani analizy empirycznej i dlaczego zostały wybrane?", answer: "W badaniu analizowałam cztery reklamy: T-Mobile 'Bądźmy mistrzami w burzeniu barier', Allegro 'Angielski', Dove 'Reverse Selfie' oraz McDonald's 'Burger Drwala'[cite: 659]. [cite_start]Zostały one dobrane celowo, aby reprezentować cztery odmienne strategiczne modele wykorzystania emocji: od budowania ciepłych, afiliacyjnych uczuć, przez katartyczne wzruszenie, aż po euforyczną ekscytację i krytyczne zaangażowanie oparte na negatywnych emocjach[cite: 1321, 1323]." , campaign: "t-mobile", imageUrl: "https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            { question: "W analizie reklamy T-Mobile wskazuje Pani na rolę muzyki. [cite_start]Proszę rozwinąć ten wątek.", answer: "W reklamie T-Mobile muzyka pełniła rolę kręgosłupa narracji emocjonalnej, co podkreślała większość respondentów[cite: 843, 844]. Rezygnacja z dialogów wzmocniła jej funkcję jako głównego nośnika znaczenia. [cite_start]Muzyka precyzyjnie podążała za dramaturgią spotu, prowadząc odbiorcę od stanu melancholii i napięcia, aż do euforycznego finału, co jeden z badanych określił jako '90% roboty, jeśli chodzi o emocje'[cite: 845, 848]. [cite_start]Jej instrumentalny charakter pozwolił na własną interpretację emocji, nie narzucając niczego[cite: 753]." , campaign: "t-mobile", imageUrl: "https://images.pexels.com/photos/164821/pexels-photo-164821.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            [cite_start]{ question: "Jakie jest podwójne znaczenie hasła 'Czego szukasz?' w kampanii Allegro?", answer: "Hasło 'Czego szukasz?' w kampanii Allegro funkcjonuje jako genialna klamra semantyczna działająca na dwóch poziomach[cite: 1012]. [cite_start]Na poziomie dosłownym, odnosi się bezpośrednio do funkcji wyszukiwarki na platformie e-commerce[cite: 1014]. [cite_start]Jednak po obejrzeniu emocjonalnej historii dziadka, pytanie to nabiera głębokiego, metaforycznego wymiaru, dotykając fundamentalnych ludzkich dążeń – poszukiwania miłości, kontaktu i sensu[cite: 919, 1015]. [cite_start]To pozycjonuje markę jako partnera w życiowych poszukiwaniach, a nie tylko platformę transakcyjną[cite: 927]." , campaign: "allegro", imageUrl: "https://images.pexels.com/photos/797793/pexels-photo-797793.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            [cite_start]{ question: "Na czym polegała siła demaskatorska techniki 'odwróconej chronologii' w reklamie Dove?", answer: "Technika 'odwróconej chronologii' w spocie Dove była niezwykle skuteczna, ponieważ zamieniła abstrakcyjne pojęcie presji social mediów w konkretny, obserwowalny proces 'produkcji' nierealistycznego wizerunku[cite: 1154]. [cite_start]Demaskowała ona kolejne warstwy cyfrowej manipulacji, co jeden z respondentów określił jako 'problem przedstawiony w formie wizualnego dowodu'[cite: 1151]. [cite_start]Finałowy obraz naturalnej twarzy dziecka stanowił brutalny kontrast dla wyjściowego, wyretuszowanego wizerunku, co podkreślało utraconą niewinność i wzmacniało szok emocjonalny[cite: 1158, 1159]." , campaign: "dove", imageUrl: "https://images.pexels.com/photos/5716013/pexels-photo-5716013.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            [cite_start]{ question: "W jaki sposób kampania 'Burger Drwala' tworzy, jak Pani to określiła, 'nowoczesny, skomercjalizowany rytuał'?", answer: "Kampania ta wykracza poza zwykłą reklamę, stając się coroczną inauguracją zjawiska o cechach rytuału[cite: 1286]. [cite_start]Marka z sukcesem wykreowała 'sztuczną tradycję', co sprawia, że spot jest odbierany jako wydarzenie i sygnał startowy[cite: 1290, 1292]. Wykorzystuje to potężne emocje związane z cyklicznością, oczekiwaniem i ograniczoną dostępnością (FOMO). [cite_start]Reklama staje się celebracją powrotu czegoś znajomego, budując poczucie przynależności do grupy, która w tym rytuale uczestniczy, co trwale wpisuje markę w kulturowy pejzaż[cite: 1295, 1317]." , campaign: "mcdonalds", imageUrl: "https://images.pexels.com/photos/2271107/pexels-photo-2271107.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            { question: "Proszę porównać 'wezwanie do działania' (call to action) we wszystkich czterech analizowanych kampaniach.", answer: "Każda kampania stosuje inne wezwanie, adekwatne do swojej strategii. [cite_start]T-Mobile pyta 'Dołączasz?', co jest inkluzywnym zaproszeniem do wspólnoty wartości[cite: 1352]. [cite_start]Allegro pyta 'Czego szukasz?', co jest wezwaniem do introspekcji, pozycjonującym markę jako życiowego partnera[cite: 1353]. [cite_start]McDonald's, komunikując powrót produktu, wysyła silne, choć ukryte, wezwanie do natychmiastowego uczestnictwa w ograniczonym czasowo rytuale[cite: 1354]. [cite_start]Z kolei Dove, rezygnując z wezwania do zakupu, stosuje wezwanie do refleksji i działania społecznego, budując zaangażowanie w misję marki[cite: 1355]." },
+            { question: "Jakie są główne wnioski płynące z Pani pracy magisterskiej?", answer: "Głównym wnioskiem jest to, że skuteczność reklamy emocjonalnej nie leży w jednym typie emocji, lecz w strategicznym dopasowaniu modelu perswazji do tożsamości marki. Praca identyfikuje i opisuje cztery takie modele: humanistyczny, katartyczny, krytyczny i rytualny. Badanie dowiodło, że emocje prowadzą do humanizacji marki, budując lojalność opartą na wspólnej tożsamości i zaufaniu. [cite_start]Współczesny, wyrafinowany konsument nagradza te marki, które oferują mu autentyczne wzruszenie, unikalne doświadczenie lub wiarygodne zaangażowanie w sprawy wykraczające poza konsumpcję[cite: 1361, 1374]." },
+            { question: "Jakie są, według Pani, etyczne implikacje wykorzystywania emocji w reklamie?", answer: "Choć praca skupia się na mechanizmach, porusza również wątek etyczny. [cite_start]Wykorzystywanie emocji, zwłaszcza tych negatywnych jak strach, do manipulacji jest kwestią problematyczną[cite: 560]. [cite_start]Skuteczna kampania emocjonalna, jak argumentuje praca, nie manipuluje uczuciami, lecz rezonuje z realnym doświadczeniem odbiorcy[cite: 302]. [cite_start]Etyczne podejście wymaga, by marki były świadome siły swojego oddziaływania i nie wykorzystywały emocji do wprowadzania w błąd, wywoływania niepotrzebnego lęku czy szkodzenia odbiorcom, co w dłuższej perspektywie prowadzi do utraty zaufania[cite: 639, 640]." },
+            [cite_start]{ question: "Czym jest 'pamięć emocjonalna' i dlaczego jest ona cenniejsza dla marki niż pamięć o faktach?", answer: "Pamięć emocjonalna to zjawisko polegające na tym, że doświadczenia o silnym ładunku afektywnym są zapamiętywane lepiej i na dłużej niż te neutralne[cite: 128]. [cite_start]Jest ona cenniejsza, ponieważ konsumenci nawet po długim czasie potrafią przypomnieć sobie emocje, jakie wzbudziła w nich marka, nawet jeśli szczegóły produktu już się zatarły[cite: 232]. [cite_start]Ta trwała, pozytywna reprezentacja w pamięci konsumenta stanowi niezwykle cenny kapitał dla marki, budując lojalność, która jest odporna na czysto racjonalne argumenty konkurencji[cite: 41, 239]." },
+            { question: "Jaką rolę w Pani badaniach odegrał proces identyfikacji odbiorcy z bohaterem reklamy?", answer: "Proces identyfikacji był kluczowym mechanizmem psychologicznym, zwłaszcza w przypadku reklam T-Mobile i Allegro. [cite_start]Respondenci, niezależnie od wieku czy płci, utożsamiali się z uniwersalnym doświadczeniem rozłąki (T-Mobile) czy poświęcenia dla rodziny (Allegro)[cite: 834, 904]. Skuteczność tego procesu zależała od postrzeganej autentyczności emocji bohaterów. [cite_start]Co więcej, reklamy te uruchamiały w odbiorcach bardzo osobiste, nacechowane emocjonalnie wspomnienia, co trwale wiązało przekaz marki z ich intymnym, biograficznym światem[cite: 839, 1003]." },
+            [cite_start]{ question: "Dlaczego autentyczność jest kluczowym warunkiem skuteczności reklamy emocjonalnej?", answer: "Autentyczność jest kluczowa, ponieważ współczesny konsument jest wyrafinowanym odbiorcą, wyczulonym na fałsz i próby manipulacji[cite: 1418]. [cite_start]Emocje, aby były skuteczne, muszą być spójne z ogólnym przekazem marki i wydawać się prawdziwe[cite: 463]. [cite_start]W badaniach respondenci wielokrotnie podkreślali, że uczucia postaci wydawały im się 'prawdziwe', 'naturalne' i 'nieprzerysowane', co warunkowało ich zaangażowanie[cite: 836]. [cite_start]Próba nieautentycznej manipulacji może przynieść efekt odwrotny do zamierzonego, prowadząc do odrzucenia przekazu i utraty zaufania[cite: 1418]." },
+            [cite_start]{ question: "W jaki sposób reklama McDonald's wykorzystuje marketing sensoryczny?", answer: "Reklama Burgera Drwala jest podręcznikowym przykładem marketingu sensorycznego, koncentrując się na wywołaniu pierwotnych, niemal fizjologicznych reakcji[cite: 1304]. [cite_start]Użycie ekstremalnych zbliżeń i zwolnionego tempa w ukazywaniu gorącego, topiącego się sera i chrupiącego bekonu (tzw. food porn) ma na celu wywołanie emocji somatycznych[cite: 1305]. [cite_start]Respondenci opisywali swoje reakcje jako 'ślinotok' czy 'fizyczne uczucie ciepła', co pozycjonuje produkt w kategorii 'comfort food' i odwołuje się bezpośrednio do biologicznie uwarunkowanych potrzeb i pragnień[cite: 1306, 1307]." , campaign: "mcdonalds", imageUrl: "https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            { question: "Jakie są główne ograniczenia zastosowanej przez Panią metodologii badawczej?", answer: "Głównym ograniczeniem jest fakt, że badanie ma charakter jakościowy i opiera się na niewielkiej, nielosowej próbie. [cite_start]Oznacza to, że jego wyników nie można uogólniać statystycznie na całą populację[cite: 1403, 1430]. [cite_start]Należy również pamiętać o subiektywizmie interpretacji badacza, nieodłącznym dla analizy danych jakościowych, oraz o tym, że sama sytuacja badawcza mogła wpłynąć na spontaniczność reakcji respondentów[cite: 1431]." },
+            { question: "Na czym polegał proces humanizacji marki, który zaobserwowała Pani w swoich badaniach?", answer: "Proces humanizacji marki to zjawisko, w którym w wyniku transferu pozytywnych emocji z reklamy, marka przestaje być postrzegana jako anonimowa korporacja, a staje się bytem o ludzkich cechach. W badaniach było to widoczne zwłaszcza w przypadku Allegro i T-Mobile. [cite_start]Respondenci opisywali, że marki te stały się w ich oczach 'ludzkie', 'empatyczne' czy posiadające 'duszę'[cite: 853, 1010]. [cite_start]Ten proces jest kluczowy dla budowania głębokiego, emocjonalnego kapitału marki i lojalności opartej na zaufaniu[cite: 854]." },
+            { question: "Jakie znaczenie w Pani pracy ma pojęcie 'rezonansu autobiograficznego'?", answer: "Rezonans autobiograficzny to mechanizm, w którym przekaz reklamowy uruchamia w odbiorcy bardzo osobiste, nacechowane emocjonalnie wspomnienia. [cite_start]Było to niezwykle silne w przypadku reklamy Allegro, która przywoływała u badanych intymne wspomnienia o poświęceniu dla bliskich[cite: 1005]. [cite_start]Dzięki temu mechanizmowi, uniwersalna historia z reklamy zostaje powiązana z biograficznym doświadczeniem widza, co potęguje siłę emocjonalnego oddziaływania i buduje trwałą, osobistą więź z marką[cite: 1007]." },
+            [cite_start]{ question: "Co Pani zdaniem wyróżniało analizowane reklamy na tle standardowej komunikacji marketingowej?", answer: "Respondenci byli uderzająco zgodni, że analizowane spoty wyróżniały się na tle standardowych reklam, które opisywali jako 'irytujące', 'głośne' i 'nachalne'[cite: 860]. [cite_start]W przeciwieństwie do nich, badane reklamy były postrzegane jako 'subtelne', 'inteligentne' i 'wyjątkowe'[cite: 860]. [cite_start]Ich siła leżała w odejściu od modelu bezpośredniej perswazji na rzecz zaangażowania odbiorcy w opowieść, co budowało szacunek i sprawiało, że reklama nie była traktowana jak intruz, a jak wartościowa treść[cite: 861]." },
+            { question: "Jakie wnioski płyną z analizy 'wezwania do działania' w reklamie T-Mobile, które brzmiało 'Dołączasz?'", answer: "Finałowe pytanie 'Dołączasz?' zostało przez respondentów odebrane bardzo pozytywnie. [cite_start]Nie było postrzegane jako transakcyjne wezwanie do zakupu, lecz jako inkluzywne zaproszenie do wspólnoty wartości[cite: 862]. Taka forma komunikacji przekształca relację z odbiorcą na bardziej partnerską, wywołując poczucie sprawczości i motywacji, zamiast presji. [cite_start]Badani opisywali swoje odczucia jako bycie 'włączonym, a nie nagabywanym' [cite: 817] [cite_start]oraz 'zainspirowanym'[cite: 818]." , campaign: "t-mobile", imageUrl: "https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            [cite_start]{ question: "Jaką rolę, według Pani, odgrywa marka w narracji reklamy Allegro?", answer: "W reklamie Allegro marka przyjmuje niezwykle subtelną rolę dyskretnego, niemal niewidocznego pomocnika[cite: 1343]. Jej siła tkwi w tej pozornej nieobecności. Marka nie jest bohaterem opowieści, lecz jedynie narzędziem w rękach bohatera, które umożliwia mu realizację wyższego celu. [cite_start]To sprawia, że jej obecność jest postrzegana jako autentyczna i nienachalna, co jest kluczowe dla uniknięcia oporu psychologicznego widza i pozwala na pełne zaangażowanie w ludzką historię[cite: 1344]." , campaign: "allegro", imageUrl: "https://images.pexels.com/photos/3769118/pexels-photo-3769118.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            [cite_start]{ question: "Dlaczego strategia marki Dove, oparta na negatywnych emocjach, okazała się skuteczna?", answer: "Strategia Dove była skuteczna, ponieważ negatywne emocje, takie jak szok i dyskomfort, nie były celem samym w sobie, lecz narzędziem do przełamania apatii widza wobec ważnego problemu społecznego[cite: 1146]. [cite_start]Wytrącając odbiorcę ze strefy komfortu, reklama zmuszała do krytycznej refleksji[cite: 1339]. [cite_start]Marka, podejmując ryzyko, zyskała ogromny kapitał moralny, stając się w oczach odbiorców 'sojusznikiem' i 'ważną instytucją społeczną', co buduje lojalność na znacznie głębszym poziomie niż tradycyjna reklama[cite: 1164, 1165]." , campaign: "dove", imageUrl: "https://images.pexels.com/photos/4156345/pexels-photo-4156345.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+            { question: "Jakie znaczenie ma sezonowość i ograniczona dostępność w strategii marketingowej Burgera Drwala?", answer: "Sezonowość i ograniczona dostępność są fundamentem sukcesu tej kampanii. [cite_start]Pozwalają na wykorzystanie potężnych mechanizmów psychologicznych, takich jak zasada niedostępności i lęk przed pominięciem (FOMO)[cite: 1294, 1396]. [cite_start]Każdego roku marka świadomie kreuje cykliczne napięcie i oczekiwanie, co sprawia, że powrót produktu staje się wydarzeniem[cite: 1420]. [cite_start]To potęguje ładunek emocjonalny i motywację do natychmiastowego działania, zamieniając zwykły zakup w uczestnictwo w kulturowym rytuale[cite: 1295]." , campaign: "mcdonalds", imageUrl: "https://images.pexels.com/photos/1893555/pexels-photo-1893555.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" }
         ];
 
         // --- Logika Aplikacji ---
@@ -136,6 +196,19 @@
             const examinerInputField = document.getElementById('examiner-input-field');
             const examinerSubmitButton = document.getElementById('examiner-submit-button');
             const examinerResponseContainer = document.getElementById('examiner-response-container');
+
+            // --- Logika Syntezatora Mowy (TTS) ---
+            function speakText(textToSpeak) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // Zatrzymaj poprzednie odtwarzanie
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = 'pl-PL';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('Twoja przeglądarka nie wspiera funkcji syntezatora mowy.');
+                }
+            }
 
             // --- Tryb Fiszki ---
             function displayRandomQuestions() {
@@ -150,16 +223,44 @@
                     const questionP = document.createElement('p');
                     questionP.classList.add('question-text');
                     questionP.textContent = qa.question;
+                    
+                    const answerContainer = document.createElement('div');
+                    answerContainer.classList.add('answer-container');
+
+                    if (qa.imageUrl) {
+                        const answerImg = document.createElement('img');
+                        answerImg.classList.add('answer-image');
+                        answerImg.src = qa.imageUrl;
+                        answerImg.alt = `Wizualizacja do kampanii ${qa.campaign}`;
+                        answerContainer.appendChild(answerImg);
+                    }
 
                     const answerP = document.createElement('p');
                     answerP.classList.add('answer-text');
                     answerP.textContent = qa.answer;
 
+                    const listenBtn = document.createElement('button');
+                    listenBtn.classList.add('listen-button');
+                    listenBtn.innerHTML = '🔊 Odsłuchaj';
+                    listenBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Zapobiegaj zwijaniu karty po kliknięciu przycisku
+                        speakText(qa.answer);
+                    });
+                    
+                    answerContainer.appendChild(answerP);
+                    answerContainer.appendChild(listenBtn);
+
                     card.appendChild(questionP);
-                    card.appendChild(answerP);
+                    card.appendChild(answerContainer);
                     
                     card.addEventListener('click', () => {
-                        answerP.style.display = answerP.style.display === 'block' ? 'none' : 'block';
+                        const isVisible = answerContainer.style.display === 'block';
+                        if (isVisible) {
+                            answerContainer.style.display = 'none';
+                            window.speechSynthesis.cancel(); // Zatrzymaj mowę przy zwijaniu
+                        } else {
+                            answerContainer.style.display = 'block';
+                        }
                     });
 
                     randomQuestionsContainer.appendChild(card);
