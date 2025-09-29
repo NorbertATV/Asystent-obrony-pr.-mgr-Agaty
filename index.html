@@ -42,6 +42,20 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .voice-selector-wrapper {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .voice-selector-wrapper label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        #voice-select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+        }
         .refresh-button {
             background-color: var(--accent-color);
             color: white;
@@ -150,6 +164,10 @@
         <div class="mode-section">
             <h2>Losowe Pytania Egzaminacyjne</h2>
             <p>Poniżej znajdują się typowe, otwarte pytania, jakie mogą paść na obronie. Kliknij, aby zobaczyć przykładową, wzorcową odpowiedź opartą na Twojej pracy.</p>
+            <div class="voice-selector-wrapper">
+                <label for="voice-select">Wybierz lektora:</label>
+                <select id="voice-select"></select>
+            </div>
             <div class="flashcard-controls">
                 <button id="refresh-button" class="refresh-button">✨ Losuj kolejne pytania</button>
             </div>
@@ -206,6 +224,7 @@
         // --- Logika Aplikacji ---
         let shuffledQuestions = [];
         let currentQuestionIndex = 0;
+        let voices = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             const randomQuestionsContainer = document.getElementById('random-questions-container');
@@ -214,8 +233,22 @@
             const examinerResponseContainer = document.getElementById('examiner-response-container');
             const refreshButton = document.getElementById('refresh-button');
             const voiceInputButton = document.getElementById('voice-input-button');
+            const voiceSelect = document.getElementById('voice-select');
 
             // --- Logika Syntezatora Mowy (TTS) ---
+            function populateVoiceList() {
+                voices = window.speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '';
+                voices.filter(voice => voice.lang === 'pl-PL')
+                      .forEach(voice => {
+                          const option = document.createElement('option');
+                          option.textContent = `${voice.name} (${voice.lang})`;
+                          option.setAttribute('data-lang', voice.lang);
+                          option.setAttribute('data-name', voice.name);
+                          voiceSelect.appendChild(option);
+                      });
+            }
+
             function speakText(textToSpeak, button) {
                 if ('speechSynthesis' in window) {
                     if (window.speechSynthesis.speaking) {
@@ -224,8 +257,13 @@
                     }
                     window.speechSynthesis.cancel(); 
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
+                    const selectedVoice = voices.find(voice => voice.name === selectedOption.getAttribute('data-name'));
+                    
+                    utterance.voice = selectedVoice;
                     utterance.lang = 'pl-PL';
                     utterance.rate = 0.95;
+
                     utterance.onstart = () => {
                         button.innerHTML = '⏹️ Zatrzymaj';
                     };
@@ -239,6 +277,11 @@
                 } else {
                     alert('Twoja przeglądarka nie wspiera funkcji syntezatora mowy.');
                 }
+            }
+            
+            populateVoiceList();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = populateVoiceList;
             }
 
             // --- Logika Rozpoznawania Mowy ---
